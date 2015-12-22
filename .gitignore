@@ -1,0 +1,4 @@
+*.pyc
+stetho.egg-info/
+build/
+dist/
