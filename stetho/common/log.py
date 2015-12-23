@@ -17,9 +17,10 @@ import logging
 
 FORMAT = '%(asctime)s %(filename)s %(levelname)s %(message)s'
 DATEFMT = '%d %b %Y %H:%M:%S'
+FILENAME = '/var/log/stetho/stetho.log'
 
 
-def get_logger(filename, format=FORMAT,
+def get_logger(filename=FILENAME, format=FORMAT,
                datefmt=DATEFMT, filemod='a+',
                level=logging.DEBUG):
     logging.basicConfig(level=level, format=format, datefmt=datefmt,

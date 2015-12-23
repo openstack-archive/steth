@@ -13,27 +13,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest
 
-from stetho.agent.common import utils
+class Interface(object):
 
+    def __init__(self, name, state=None, inet=None, netmask=None,
+                 broadcast=None, ether=None):
+        self.name = name
+        self.inet = inet
+        self.state = state
+        self.netmask = netmask
+        self.broadcast = broadcast
+        self.ether = ether
 
-class TestUtils(unittest.TestCase):
-
-    def setUp(self):
-        self.test_file = self.get_temp_file_path('test_execute.tmp')
-        open(self.test_file, 'w+').close()
-
-    def test_execute(self):
-        expected = "%s\n" % self.test_file
-        code, result = utils.execute(["ls", self.test_file])
-        self.assertEqual(0, code)
-        self.assertEqual(result.pop(), expected.strip('\n'))
-
-    def get_temp_file_path(self, filename, root=None):
-        root = '/tmp/%s'
-        return root % filename
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def make_dict(self):
+        inf = dict()
+        inf['name'] = self.name
+        inf['inet'] = self.inet
+        inf['state'] = self.state
+        inf['netmask'] = self.netmask
+        inf['broadcast'] = self.broadcast
+        inf['ether'] = self.ether
+        return inf

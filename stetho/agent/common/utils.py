@@ -13,19 +13,45 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import re
 import time
 import shlex
 import subprocess
+from threading import Timer
 from stetho.common import log
+from stetho.common import resource
 
-log = log.get_logger('/opt/stack/logs/stetho-agent.log')
+
+log = log.get_logger('/var/log/stetho/stetho-agent.log')
 
 
-def execute(cmd, time=None, shell=False):
+def execute(cmd, shell=False, root=False, timeout=10):
     try:
-        log.info(cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=shell)
-        out = p.stdout.readlines()
-        return [line.strip() for line in out]
+        log.debug(cmd)
+        subproc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=shell)
+        timer = Timer(timeout, lambda proc: proc.kill(), [subproc])
+        timer.start()
+        subproc.wait()
+        stdcode = subproc.returncode
+        stdout = subproc.stdout.readlines()
+        timer.cancel()
+        return stdcode, [line.strip() for line in stdout]
     except Exception as e:
         log.exception(e)
+        raise
+
+
+def get_interface(interface):
+    cmd = ['ifconfig', interface]
+    stdcode, stdout = execute(cmd)
+    if stdcode == 0:
+        inf = resource.Interface(interface)
+        pattern = r'<([A-Z]+)'
+        inf.state = re.search(pattern, stdout[0]).groups()[0]
+        pattern = r'inet\s(.*)\s\snetmask\s(.*)\s\sbroadcast\s(.*)'
+        tmp = re.search(pattern, stdout[1]).groups()
+        (inf.inet, inf.netmask, inf.broadcast) = tmp
+        inf.ether = stdout[3][6:23]
+        return stdcode, '', inf.make_dict()
+    else:
+        return stdcode, stdout.pop(), None

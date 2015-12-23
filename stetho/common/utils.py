@@ -13,27 +13,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest
 
-from stetho.agent.common import utils
-
-
-class TestUtils(unittest.TestCase):
-
-    def setUp(self):
-        self.test_file = self.get_temp_file_path('test_execute.tmp')
-        open(self.test_file, 'w+').close()
-
-    def test_execute(self):
-        expected = "%s\n" % self.test_file
-        code, result = utils.execute(["ls", self.test_file])
-        self.assertEqual(0, code)
-        self.assertEqual(result.pop(), expected.strip('\n'))
-
-    def get_temp_file_path(self, filename, root=None):
-        root = '/tmp/%s'
-        return root % filename
+from json import JSONEncoder
+from json import JSONDecoder
 
 
-if __name__ == '__main__':
-    unittest.main()
+def register_api(server, api_obj):
+    methods = dir(api_obj)
+    apis = filter(lambda m: not m.startswith('__'), methods)
+    [server.register_function(getattr(api_obj, api)) for api in apis]
+
+
+def make_response(code=0, message='', data=dict()):
+    response = dict()
+    response['code'] = code
+    response['message'] = message
+    response['data'] = data
+    return response
