@@ -14,7 +14,6 @@
 #    under the License.
 
 
-from stetho.common import utils as s_utils
 from stetho.agent.common import utils as agent_utils
 
 
@@ -45,7 +44,7 @@ def get_interface(interface):
     """ifconfig
     """
     code, message, data = agent_utils.get_interface(interface)
-    return s_utils.make_response(code, message, data)
+    return agent_utils.make_response(code, message, data)
 
 
 def setup_link(interface, cidr):
