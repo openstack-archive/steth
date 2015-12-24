@@ -1,1 +1,3 @@
 jsonrpclib
+netaddr
+mock

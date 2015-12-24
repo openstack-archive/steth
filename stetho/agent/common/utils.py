@@ -23,16 +23,23 @@ from stetho.agent.common import resource
 
 def execute(cmd, shell=False, root=False, timeout=10):
     try:
-        subproc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=shell)
+        if root:
+            cmd.insert(0, 'sudo')
+        subproc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, shell=shell)
         timer = Timer(timeout, lambda proc: proc.kill(), [subproc])
         timer.start()
         subproc.wait()
         stdcode = subproc.returncode
         stdout = subproc.stdout.readlines()
+        stderr = subproc.stderr.readlines()
         timer.cancel()
-        return stdcode, [line.strip() for line in stdout]
+
+        def list_strip(lines):
+            return [line.strip() for line in lines]
+
+        return stdcode, list_strip(stderr) if stdcode else list_strip(stdout)
     except Exception as e:
-        log.exception(e)
         raise
 
 
@@ -41,20 +48,26 @@ def get_interface(interface):
        such as eth0.
     """
     cmd = ['ifconfig', interface]
+    stdcode, stdout = execute(cmd)
     try:
-        stdcode, stdout = execute(cmd)
         inf = resource.Interface(interface)
         pattern = r'<([A-Z]+)'
         inf.state = re.search(pattern, stdout[0]).groups()[0]
         pattern = r'inet\s(.*)\s\snetmask\s(.*)\s\sbroadcast\s(.*)'
-        tmp = re.search(pattern, stdout[1]).groups()
-        (inf.inet, inf.netmask, inf.broadcast) = tmp
-        inf.ether = stdout[3][6:23]
+        for line in stdout:
+            if line.startswith('inet '):
+                tmp = re.search(pattern, stdout[1]).groups()
+                (inf.inet, inf.netmask, inf.broadcast) = tmp
+                stdout.remove(line)
+                break
+        for line in stdout:
+            if line.startswith('ether'):
+                inf.ether = line[6:23]
+                stdout.remove(line)
+                break
         return stdcode, '', inf.make_dict()
     except Exception as e:
-        stdcode = 1
-        message = 'Get interface error.'
-        message = message if len(stdout) == 0 else stdout.pop(0)
+        message = stdout.pop(0)
         return stdcode, message, None
 
 
