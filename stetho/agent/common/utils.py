@@ -18,16 +18,11 @@ import time
 import shlex
 import subprocess
 from threading import Timer
-from stetho.common import log
-from stetho.common import resource
-
-
-log = log.get_logger('/var/log/stetho/stetho-agent.log')
+from stetho.agent.common import resource
 
 
 def execute(cmd, shell=False, root=False, timeout=10):
     try:
-        log.debug(cmd)
         subproc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=shell)
         timer = Timer(timeout, lambda proc: proc.kill(), [subproc])
         timer.start()
@@ -42,9 +37,12 @@ def execute(cmd, shell=False, root=False, timeout=10):
 
 
 def get_interface(interface):
+    """Support Centos standard physical interface,
+       such as eth0.
+    """
     cmd = ['ifconfig', interface]
-    stdcode, stdout = execute(cmd)
-    if stdcode == 0:
+    try:
+        stdcode, stdout = execute(cmd)
         inf = resource.Interface(interface)
         pattern = r'<([A-Z]+)'
         inf.state = re.search(pattern, stdout[0]).groups()[0]
@@ -53,5 +51,22 @@ def get_interface(interface):
         (inf.inet, inf.netmask, inf.broadcast) = tmp
         inf.ether = stdout[3][6:23]
         return stdcode, '', inf.make_dict()
-    else:
-        return stdcode, stdout.pop(), None
+    except Exception as e:
+        stdcode = 1
+        message = 'Get interface error.'
+        message = message if len(stdout) == 0 else stdout.pop(0)
+        return stdcode, message, None
+
+
+def register_api(server, api_obj):
+    methods = dir(api_obj)
+    apis = filter(lambda m: not m.startswith('_'), methods)
+    [server.register_function(getattr(api_obj, api)) for api in apis]
+
+
+def make_response(code=0, message='', data=dict()):
+    response = dict()
+    response['code'] = code
+    response['message'] = '' if message is None else message
+    response['data'] = dict() if data is None else data
+    return response

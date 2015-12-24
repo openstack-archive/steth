@@ -34,6 +34,11 @@ class TestUtils(unittest.TestCase):
         root = '/tmp/%s'
         return root % filename
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_make_response(self):
+        para = dict()
+        para['code'] = 0
+        para['message'] = 'Test make response.'
+        para['data'] = dict()
+        result = utils.make_response(para['code'], para['message'],
+                                     para['data'])
+        self.assertEqual(para, result)

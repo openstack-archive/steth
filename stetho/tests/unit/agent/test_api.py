@@ -14,15 +14,11 @@
 #    under the License.
 
 import unittest
-import logging
-
-from stetho.common import log
+from stetho.agent import api
 
 
-class TestLog(unittest.TestCase):
-    def test_get_logger(self):
-        log_test = log.get_logger(filename='test')
-        self.assertEqual(type(log_test), type(logging.getLogger()))
-
-if __name__ == '__main__':
-    unittest.main()
+class TestApi(unittest.TestCase):
+    def test_get_interface(self):
+        interface = 'eth0'
+        result = api.get_interface(interface)
+        self.assertEqual(result['code'], 0)

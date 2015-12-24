@@ -17,13 +17,11 @@ import os
 import sys
 from SocketServer import ThreadingMixIn
 from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
-from stetho.common import log
 from stetho.agent import api as agent_api
-from stetho.common import utils as s_utils
+from stetho.agent.common import utils as agent_utils
 
 
 # Listening endpoint
-LISTEN_PROTOCOL = 'tcp'
 LISTEN_ADDR = '0.0.0.0'
 LISTEN_PORT = 9698
 
@@ -38,9 +36,8 @@ def main():
     endpoint = (LISTEN_ADDR, LISTEN_PORT)
     server = AsyncJSONRPCServer(endpoint)
     server.register_multicall_functions()
-    s_utils.register_api(server, agent_api)
+    agent_utils.register_api(server, agent_api)
     server.serve_forever()
-    LOG.info("Agent listening in %s:%s" % endpoint)
 
 
 if __name__ == '__main__':
