@@ -23,7 +23,7 @@ def check_ports_on_br(bridge='br-ex', ports=['eth3']):
 
     ovs-vsctl list-ports bridge
     """
-    cmd = ['ovs-vsctl', 'list-ports', 'br-ex']
+    cmd = ['ovs-vsctl', 'list-ports', bridge]
     stdcode, stdout = agent_utils.execute(cmd, root=True)
     data = dict()
     if not stdcode:
