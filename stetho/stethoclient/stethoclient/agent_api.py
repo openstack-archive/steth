@@ -63,7 +63,7 @@ class GetInterface(Lister):
         self.log.debug('Create connection with %s success.' % (
                         parsed_args.agent))
         return server
- 
+
     def take_action(self, parsed_args):
         self.log.debug('Get parsed_args: %s' % parsed_args)
         self.log.debug('Agent is %s' % parsed_args.agent)
