@@ -13,16 +13,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest
-import logging
 
-from stetho.common import log
+class Interface(object):
 
+    def __init__(self, name, state=None, inet=None, netmask=None,
+                 broadcast=None, ether=None):
+        self.name = name
+        self.inet = inet
+        self.state = state
+        self.netmask = netmask
+        self.broadcast = broadcast
+        self.ether = ether
 
-class TestLog(unittest.TestCase):
-    def test_get_logger(self):
-        log_test = log.get_logger(filename='test')
-        self.assertEqual(type(log_test), type(logging.getLogger()))
-
-if __name__ == '__main__':
-    unittest.main()
+    def make_dict(self):
+        inf = dict()
+        inf['name'] = self.name
+        inf['inet'] = self.inet
+        inf['state'] = self.state
+        inf['netmask'] = self.netmask
+        inf['broadcast'] = self.broadcast
+        inf['ether'] = self.ether
+        return inf

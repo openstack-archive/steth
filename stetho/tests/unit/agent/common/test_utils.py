@@ -26,13 +26,19 @@ class TestUtils(unittest.TestCase):
 
     def test_execute(self):
         expected = "%s\n" % self.test_file
-        result = utils.execute(["ls", self.test_file])
+        code, result = utils.execute(["ls", self.test_file])
+        self.assertEqual(0, code)
         self.assertEqual(result.pop(), expected.strip('\n'))
 
     def get_temp_file_path(self, filename, root=None):
         root = '/tmp/%s'
         return root % filename
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_make_response(self):
+        para = dict()
+        para['code'] = 0
+        para['message'] = 'Test make response.'
+        para['data'] = dict()
+        result = utils.make_response(para['code'], para['message'],
+                                     para['data'])
+        self.assertEqual(para, result)
