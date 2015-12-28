@@ -10,4 +10,4 @@ install:
 # command to run tests
 before_script:
   - "pep8 stetho"
-script: nosetests
+script: nosetests -v
