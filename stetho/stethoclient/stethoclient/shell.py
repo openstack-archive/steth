@@ -29,7 +29,11 @@ VERSION = '0.1'
 STETHO_API_VERSION = '0.1'
 
 COMMAND_V1 = {
-    'ping-agent': agent_api.PingAgent,
+    'setup-link': agent_api.SetUpLink,
+    'teardown-link': agent_api.TearDownLink,
+    'add-vlan-to-interface': agent_api.AddVlanToInterface,
+    'ping': agent_api.AgentPing,
+    'check-ports-on-br': agent_api.CheckPortsOnBr,
     'get-interface': agent_api.GetInterface,
 }
 

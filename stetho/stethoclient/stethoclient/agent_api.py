@@ -26,15 +26,76 @@ from stethoclient.constants import AGENT_INFOS
 LISTEN_PORT = 9698
 
 
-class PingAgent(Command):
-    "Get agent status."
+def setup_server(agent):
+    log = logging.getLogger(__name__)
+    if agent in AGENT_INFOS:
+        log.debug('get agent:%s ip_address:%s' % (
+            agent, AGENT_INFOS[agent]))
+    else:
+        log.error('Agent %s not configured. Please check it.' % (
+                         agent))
+        sys.exit()
+    log.debug('Begin create connection with http://%s:9698.' % (
+                    agent))
+    server = jsonrpclib.Server('http://%s:%s' % (
+             AGENT_INFOS[agent], LISTEN_PORT))
+    log.debug('Create connection with %s success.' % (agent))
+    return server
+
+
+class TearDownLink(Command):
+    "Delete a link"
 
     log = logging.getLogger(__name__)
 
+    def get_parser(self, prog_name):
+        parser = super(TearDownLink, self).get_parser(prog_name)
+        parser.add_argument('agent', default='bad')
+        parser.add_argument('interface', default='.')
+        return parser
+
     def take_action(self, parsed_args):
-        self.log.info('sending message!')
-        self.log.debug('sending debug message!')
-        self.app.stdout.write('hi!')
+        self.log.debug('Get parsed_args: %s' % parsed_args)
+        self.log.debug('Agent is %s' % parsed_args.agent)
+        self.log.debug('Interface is %s' % parsed_args.interface)
+        server = setup_server(parsed_args.agent)
+        try:
+            res = server.teardown_link(parsed_args.interface)
+        except Exception as e:
+            self.log.error('Error %s has occured.' % res)
+
+
+class SetUpLink(Lister):
+    "Setup a link"
+
+    log = logging.getLogger(__name__)
+
+    def get_parser(self, prog_name):
+        parser = super(SetUpLink, self).get_parser(prog_name)
+        parser.add_argument('agent', default='bad')
+        parser.add_argument('interface', default='eth0')
+        parser.add_argument('cidr', default='.')
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug('Get parsed_args: %s' % parsed_args)
+        self.log.debug('Agent is %s' % parsed_args.agent)
+        self.log.debug('Interface is %s' % parsed_args.interface)
+        self.log.debug('Cidr is %s' % parsed_args.cidr)
+        server = setup_server(parsed_args.agent)
+        try:
+            # Setup Link
+            server.setup_link(parsed_args.interface,
+                              parsed_args.cidr)
+            # Get Link info
+            res = server.get_interface(parsed_args.interface)
+            self.log.debug('Response is %s' % res)
+            if res['code'] == 0:
+                return (('Field', 'Value'),
+                        ((k, v) for k, v in res['data'].items()))
+        except Exception as e:
+            self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
+            sys.exit()
 
 
 class GetInterface(Lister):
@@ -48,27 +109,11 @@ class GetInterface(Lister):
         parser.add_argument('interface', default='eth0')
         return parser
 
-    def setup_server(self, parsed_args):
-        if parsed_args.agent in AGENT_INFOS:
-            self.log.debug('get agent:%s ip_address:%s' % (
-                parsed_args.agent, AGENT_INFOS[parsed_args.agent]))
-        else:
-            self.log.error('Agent %s not configured. Please check it.' % (
-                            parsed_args.agent))
-            sys.exit()
-        self.log.debug('Begin create connection with http://%s:9698.' % (
-                        parsed_args.agent))
-        server = jsonrpclib.Server('http://%s:%s' % (
-                 AGENT_INFOS[parsed_args.agent], LISTEN_PORT))
-        self.log.debug('Create connection with %s success.' % (
-                        parsed_args.agent))
-        return server
-
     def take_action(self, parsed_args):
         self.log.debug('Get parsed_args: %s' % parsed_args)
         self.log.debug('Agent is %s' % parsed_args.agent)
         self.log.debug('Interface is %s' % parsed_args.interface)
-        server = self.setup_server(parsed_args)
+        server = setup_server(parsed_args.agent)
         try:
             res = server.get_interface(parsed_args.interface)
             self.log.debug('Response is %s' % res)
@@ -77,4 +122,97 @@ class GetInterface(Lister):
                         ((k, v) for k, v in res['data'].items()))
         except:
             self.log.error('Agent %s return error!' % parsed_args.agent)
+            sys.exit()
+
+
+class AddVlanToInterface(Lister):
+    "Setup a link"
+
+    log = logging.getLogger(__name__)
+
+    def get_parser(self, prog_name):
+        parser = super(AddVlanToInterface, self).get_parser(prog_name)
+        parser.add_argument('agent', default='bad')
+        parser.add_argument('interface', default='eth0')
+        parser.add_argument('vlan_id', default='1124')
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug('Get parsed_args: %s' % parsed_args)
+        self.log.debug('Agent is %s' % parsed_args.agent)
+        self.log.debug('Interface is %s' % parsed_args.interface)
+        self.log.debug('Vlan_id is %s' % parsed_args.vlan_id)
+        server = setup_server(parsed_args.agent)
+        try:
+            # Setup Link
+            server.add_vlan_to_interface(parsed_args.interface,
+                                         parsed_args.vlan_id)
+            # Get Link info
+            new_interface = parsed_args.interface + '.' + parsed_args.vlan_id
+            res = server.get_interface(new_interface)
+            self.log.debug('Response is %s' % res)
+            if res['code'] == 0:
+                return (('Field', 'Value'),
+                        ((k, v) for k, v in res['data'].items()))
+        except Exception as e:
+            self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
+            sys.exit()
+
+
+class AgentPing(Lister):
+    "Ping a destination from one agent"
+
+    log = logging.getLogger(__name__)
+
+    def get_parser(self, prog_name):
+        parser = super(AgentPing, self).get_parser(prog_name)
+        parser.add_argument('agent', default='bad')
+        parser.add_argument('destination', default='1.2.4.8')
+        parser.add_argument('count', nargs='?', default='2')
+        parser.add_argument('timeout', nargs='?', default='2')
+        parser.add_argument('interface', nargs='?', default='eth0')
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug('Get parsed_args: %s' % parsed_args)
+        server = setup_server(parsed_args.agent)
+        try:
+            dest = parsed_args.destination.split(',')
+            res = server.ping(ips=dest,
+                              count=parsed_args.count,
+                              timeout=parsed_args.timeout,
+                              interface=parsed_args.interface)
+            self.log.debug('Response is %s' % res)
+            if res['code'] == 0:
+                return (('Destination', 'Packet Loss (%)'),
+                        ((k, v) for k, v in res['data'].items()))
+        except Exception as e:
+            self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
+            sys.exit()
+
+
+class CheckPortsOnBr(Lister):
+    "Check a port if exists on a ovs bridge"
+
+    log = logging.getLogger(__name__)
+
+    def get_parser(self, prog_name):
+        parser = super(CheckPortsOnBr, self).get_parser(prog_name)
+        parser.add_argument('agent', default='bad')
+        parser.add_argument('bridge', default='br-int')
+        parser.add_argument('port', default='br-int')
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug('Get parsed_args: %s' % parsed_args)
+        server = setup_server(parsed_args.agent)
+        try:
+            res = server.check_ports_on_br(parsed_args.bridge,
+                                           parsed_args.port)
+            self.log.debug('Response is %s' % res)
+            if res['code'] == 0:
+                return (('Port', 'Exists'),
+                        ((k, v) for k, v in res['data'].items()))
+        except Exception as e:
+            self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
             sys.exit()
