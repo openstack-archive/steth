@@ -21,8 +21,8 @@ import logging
 
 from cliff import app
 from cliff import commandmanager
-from stethoclient import agent_api
-from stethoclient import strutils
+from stetho.stethoclient import agent_api
+from stetho.stethoclient import strutils
 
 
 VERSION = '0.1'

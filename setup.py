@@ -25,4 +25,10 @@ setup(name='stetho',
       license = "APL",
       keywords = ("stetho", "egg"),
       platforms = "Independant",
-      url = "https://www.ustack.com")
+      url = "https://www.ustack.com",
+      entry_points={
+          'console_scripts': [
+              'stetho = stetho.stethoclient.shell:main'
+          ]
+      }
+)

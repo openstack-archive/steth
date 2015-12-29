@@ -21,7 +21,7 @@ import sys
 from cliff.command import Command
 from cliff.lister import Lister
 from json import JSONDecoder
-from stethoclient.constants import AGENT_INFOS
+from stetho.stethoclient.constants import AGENT_INFOS
 
 LISTEN_PORT = 9698
 
