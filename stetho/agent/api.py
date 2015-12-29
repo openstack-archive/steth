@@ -47,8 +47,8 @@ def ping(ips,  boardcast=False,
     ping host -c 2 -W 2
     """
     cmd = ['ping', '-c', str(count), '-W', str(timeout)]
-    cmd = cmd if not interface else cmd.extend(['-I', interface])
-    cmd = cmd if not boardcast else cmd.append('-b')
+    True if not interface else cmd.extend(['-I', interface])
+    True if not boardcast else cmd.append('-b')
     # Batch create subprocess
     data = dict()
     try:
