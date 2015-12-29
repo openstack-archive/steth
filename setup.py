@@ -28,7 +28,8 @@ setup(name='stetho',
       url = "https://www.ustack.com",
       entry_points={
           'console_scripts': [
-              'stetho = stetho.stethoclient.shell:main'
+              'stetho = stetho.stethoclient.shell:main',
+              'stetho-agent = stetho.agent.agent:main',
           ]
       }
 )
