@@ -17,6 +17,7 @@ import re
 import time
 import shlex
 import subprocess
+import platform
 from threading import Timer
 from stetho.agent.common import resource
 
@@ -47,28 +48,66 @@ def get_interface(interface):
     """Support Centos standard physical interface,
        such as eth0.
     """
-    cmd = ['ifconfig', interface]
-    stdcode, stdout = execute(cmd)
-    try:
-        inf = resource.Interface(interface)
+    # Supported CentOS Version
+    supported_dists = ['7.0', '6.5']
+
+    def format_centos_7_0(inf):
         pattern = r'<([A-Z]+)'
-        inf.state = re.search(pattern, stdout[0]).groups()[0]
+        state = re.search(pattern, stdout[0]).groups()[0]
+        state = 'UP' if not cmp(state, 'UP') else 'DOWN'
+        inf.state = state
+        stdout.pop(0)
         pattern = r'inet\s(.*)\s\snetmask\s(.*)\s\sbroadcast\s(.*)'
         for line in stdout:
             if line.startswith('inet '):
-                tmp = re.search(pattern, stdout[1]).groups()
+                tmp = re.search(pattern, line).groups()
                 (inf.inet, inf.netmask, inf.broadcast) = tmp
                 stdout.remove(line)
                 break
         for line in stdout:
             if line.startswith('ether'):
                 inf.ether = line[6:23]
-                stdout.remove(line)
                 break
         return stdcode, '', inf.make_dict()
-    except Exception as e:
-        message = stdout.pop(0)
-        return stdcode, message, None
+
+    def format_centos_6_5(inf):
+        pattern = r'HWaddr\s(.*)'
+        inf.ether = re.search(pattern, stdout[0]).groups()[0]
+        stdout.pop(0)
+        pattern = r'addr:(.*)\s\sBcast:(.*)\s\sMask:(.*)'
+        for line in stdout:
+            if line.startswith('inet '):
+                tmp = re.search(pattern, line).groups()
+                (inf.inet, inf.broadcast, inf.netmask) = tmp
+                stdout.remove(line)
+                break
+        inf.state = 'DOWN'
+        for line in stdout:
+            if 'RUNNING' in line:
+                state = line[:2]
+                state = 'UP' if not cmp(state, 'UP') else 'DOWN'
+                inf.state = state
+                break
+        return stdcode, '', inf.make_dict()
+
+    linux_dist = platform.linux_distribution()[1][:3]
+    if linux_dist in supported_dists:
+        try:
+            cmd = ['ifconfig', interface]
+            stdcode, stdout = execute(cmd)
+            inf = resource.Interface(interface)
+            if not cmp(linux_dist, '6.5'):
+                return format_centos_6_5(inf)
+            elif not cmp(linux_dist, '7.0'):
+                return format_centos_7_0(inf)
+        except Exception as e:
+            message = stdout.pop(0)
+            return stdcode, message, None
+
+    # Unsupported OS distribute
+    message = 'Unsupported OS distribute %s, only support for CentOS %s.'
+    message = message % (linux_dist, str(supported_dists))
+    return 1, message, None
 
 
 def register_api(server, api_obj):

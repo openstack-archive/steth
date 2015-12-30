@@ -26,7 +26,7 @@ def check_ports_on_br(bridge='br-ex', ports=['eth3']):
     cmd = ['ovs-vsctl', 'list-ports', bridge]
     stdcode, stdout = agent_utils.execute(cmd, root=True)
     data = dict()
-    if not stdcode:
+    if stdcode == 0:
         for port in ports:
             if port in stdout:
                 data[port] = True
@@ -34,10 +34,10 @@ def check_ports_on_br(bridge='br-ex', ports=['eth3']):
             else:
                 data[port] = False
         return agent_utils.make_response(code=stdcode, data=data)
-    else:
-        message = stdout.pop(0)
-        return agent_utils.make_response(code=stdcode,
-                                         message=message)
+    # execute failed.
+    message = stdout.pop(0)
+    return agent_utils.make_response(code=stdcode,
+                                     message=message)
 
 
 def ping(ips,  boardcast=False,
@@ -77,9 +77,9 @@ def add_vlan_to_interface(interface, vlan_id):
     stdcode, stdout = agent_utils.execute(cmd, root=True)
     if stdcode == 0:
         return agent_utils.make_response(code=stdcode)
-    else:
-        message = stdout.pop(0)
-        return agent_utils.make_response(code=stdcode, message=message)
+    # execute failed.
+    message = stdout.pop(0)
+    return agent_utils.make_response(code=stdcode, message=message)
 
 
 def get_interface(interface='eth0'):
@@ -121,6 +121,6 @@ def teardown_link(interface):
     stdcode, stdout = agent_utils.execute(cmd, root=True)
     if stdcode == 0:
         return agent_utils.make_response(code=stdcode)
-    else:
-        message = stdout.pop(0)
-        return agent_utils.make_response(code=stdcode, message=message)
+    # execute failed.
+    message = stdout.pop(0)
+    return agent_utils.make_response(code=stdcode, message=message)
