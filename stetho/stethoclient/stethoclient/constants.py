@@ -13,11 +13,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-AGENT_INFOS = {
-    'agent-64': 'localhost',
-    'agent-65': 'localhost',
-    'agent-67': 'localhost',
-    'agent-68': 'localhost',
-    'agent-69': 'localhost',
-    'agent-70': 'localhost',
-}
+from oslo_config import cfg
+
+OPTS = [
+    cfg.ListOpt('network_agents_info', default=[],
+                help="Mappings of network agents and stetho listened IP."),
+    cfg.ListOpt('compute_agents_info', default=[],
+                help="Mappings of compute agents and stetho listened IP."),
+    cfg.StrOpt('managed_network_prefix', default='127.0.0.',
+               help="Managed network prefix."),
+]
+
+cfg.CONF.register_opts(OPTS)
+cfg.CONF([], project='stetho',
+         default_config_files=['/etc/stetho/stetho.conf'])
+
+AGENT_INFOS = {}
+all_agents = cfg.CONF.network_agents_info + cfg.CONF.compute_agents_info
+for agent in all_agents:
+    item = {'agent-'+agent: cfg.CONF.managed_network_prefix+agent}
+    AGENT_INFOS.update(item)

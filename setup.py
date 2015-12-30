@@ -26,6 +26,9 @@ setup(name='stetho',
       keywords = ("stetho", "egg"),
       platforms = "Independant",
       url = "https://www.ustack.com",
+      data_files=[
+              ('/etc/stetho', ['etc/stetho.conf']),
+      ],
       entry_points={
           'console_scripts': [
               'stetho = stetho.stethoclient.shell:main',
