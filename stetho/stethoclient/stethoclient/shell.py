@@ -70,7 +70,7 @@ def main(argv=sys.argv[1:]):
             list(map(strutils.safe_decode, argv)))
     except KeyboardInterrupt:
         print "... terminating neutron client"
-        return 130
+        return 1
     except Exception as e:
         print(e)
         return 1
