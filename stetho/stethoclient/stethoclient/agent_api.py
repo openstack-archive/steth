@@ -24,6 +24,28 @@ from json import JSONDecoder
 from stetho.stethoclient.constants import AGENT_INFOS
 
 LISTEN_PORT = 9698
+SETUP_LINK_IP_PRE = "192.168.100."
+
+
+class Logger():
+        HEADER = '\033[95m'
+        OKBLUE = '\033[94m'
+        OKGREEN = '\033[92m'
+        WARNING = '\033[93m'
+        FAIL = '\033[91m'
+        ENDC = '\033[0m'
+
+        @staticmethod
+        def log_normal(info):
+                print Logger.OKBLUE + info + Logger.ENDC
+
+        @staticmethod
+        def log_high(info):
+                print Logger.OKGREEN + info + Logger.ENDC
+
+        @staticmethod
+        def log_fail(info):
+                print Logger.FAIL + info + Logger.ENDC
 
 
 def setup_server(agent):
@@ -212,6 +234,60 @@ class CheckPortsOnBr(Lister):
             self.log.debug('Response is %s' % res)
             if res['code'] == 0:
                 return (('Port', 'Exists'),
+                        ((k, v) for k, v in res['data'].items()))
+        except Exception as e:
+            self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
+            sys.exit()
+
+
+class CheckVlanInterface(Lister):
+    """Check vlan if exists in switch"""
+    log = logging.getLogger(__name__)
+
+    def get_parser(self, prog_name):
+        parser = super(CheckVlanInterface, self).get_parser(prog_name)
+        parser.add_argument('agentA', default='bad')
+        parser.add_argument('agentB', default='bad')
+        parser.add_argument('interface', default='eth0')
+        parser.add_argument('vlan_id', default='1124')
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug('Get parsed_args: %s' % parsed_args)
+        serverA = setup_server(parsed_args.agentA)
+        serverB = setup_server(parsed_args.agentB)
+        try:
+            # teardown the interface in each agent
+            interface = parsed_args.interface + '.' + parsed_args.vlan_id
+            resA = serverA.teardown_link(interface)
+            self.log.debug('Response is %s' % resA)
+            resB = serverB.teardown_link(interface)
+            self.log.debug('Response is %s' % resB)
+            Logger.log_normal(('AgentA and agentB has already deleted the'
+                               'vlan %s in %s') % (parsed_args.vlan_id,
+                                                   parsed_args.interface))
+            # add vlan interface in each agent
+            resA = serverA.add_vlan_to_interface(parsed_args.interface,
+                                                 parsed_args.vlan_id)
+            self.log.debug('Response is %s' % resA)
+            resB = serverB.add_vlan_to_interface(parsed_args.interface,
+                                                 parsed_args.vlan_id)
+            self.log.debug('Response is %s' % resB)
+            Logger.log_normal(('AgentA and agentB has already added the '
+                               'interface %s ') % (interface))
+            # setup link in each agent
+            ipA = SETUP_LINK_IP_PRE + parsed_args.agentA.split('-')[1] + '/24'
+            resA = serverA.setup_link(interface, ipA)
+            self.log.debug('Response is %s' % resA)
+            ipB = SETUP_LINK_IP_PRE + parsed_args.agentB.split('-')[1] + '/24'
+            resB = serverB.setup_link(interface, ipB)
+            self.log.debug('Response is %s' % resB)
+            Logger.log_normal(('AgentA and agentB has already setup the '
+                               'IP %s and IP %s') % (ipA, ipB))
+            # ping a agent from exists IP to check connectivity
+            res = serverA.ping(ips=[ipB])
+            if res['code'] == 0:
+                return (('Destination', 'Packet Loss (%)'),
                         ((k, v) for k, v in res['data'].items()))
         except Exception as e:
             self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
