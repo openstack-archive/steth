@@ -28,24 +28,24 @@ SETUP_LINK_IP_PRE = "192.168.100."
 
 
 class Logger():
-        HEADER = '\033[95m'
-        OKBLUE = '\033[94m'
-        OKGREEN = '\033[92m'
-        WARNING = '\033[93m'
-        FAIL = '\033[91m'
-        ENDC = '\033[0m'
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
 
-        @staticmethod
-        def log_normal(info):
-                print Logger.OKBLUE + info + Logger.ENDC
+    @staticmethod
+    def log_normal(info):
+        print Logger.OKBLUE + info + Logger.ENDC
 
-        @staticmethod
-        def log_high(info):
-                print Logger.OKGREEN + info + Logger.ENDC
+    @staticmethod
+    def log_high(info):
+        print Logger.OKGREEN + info + Logger.ENDC
 
-        @staticmethod
-        def log_fail(info):
-                print Logger.FAIL + info + Logger.ENDC
+    @staticmethod
+    def log_fail(info):
+        print Logger.FAIL + info + Logger.ENDC
 
 
 def setup_server(agent):
@@ -257,15 +257,7 @@ class CheckVlanInterface(Lister):
         serverA = setup_server(parsed_args.agentA)
         serverB = setup_server(parsed_args.agentB)
         try:
-            # teardown the interface in each agent
             interface = parsed_args.interface + '.' + parsed_args.vlan_id
-            resA = serverA.teardown_link(interface)
-            self.log.debug('Response is %s' % resA)
-            resB = serverB.teardown_link(interface)
-            self.log.debug('Response is %s' % resB)
-            Logger.log_normal(('AgentA and agentB has already deleted the'
-                               'vlan %s in %s') % (parsed_args.vlan_id,
-                                                   parsed_args.interface))
             # add vlan interface in each agent
             resA = serverA.add_vlan_to_interface(parsed_args.interface,
                                                  parsed_args.vlan_id)
@@ -286,6 +278,15 @@ class CheckVlanInterface(Lister):
                                'IP %s and IP %s') % (ipA, ipB))
             # ping a agent from exists IP to check connectivity
             res = serverA.ping(ips=[ipB])
+            # teardown the interface in each agent to clean all resources
+            resA = serverA.teardown_link(interface)
+            self.log.debug('Response is %s' % resA)
+            resB = serverB.teardown_link(interface)
+            self.log.debug('Response is %s' % resB)
+            Logger.log_normal(('AgentA and agentB has already deleted the'
+                               'vlan %s in %s') % (parsed_args.vlan_id,
+                                                   parsed_args.interface))
+            
             if res['code'] == 0:
                 return (('Destination', 'Packet Loss (%)'),
                         ((k, v) for k, v in res['data'].items()))
