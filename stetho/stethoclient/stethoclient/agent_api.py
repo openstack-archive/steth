@@ -286,7 +286,6 @@ class CheckVlanInterface(Lister):
             Logger.log_normal(('AgentA and agentB has already deleted the'
                                'vlan %s in %s') % (parsed_args.vlan_id,
                                                    parsed_args.interface))
-            
             if res['code'] == 0:
                 return (('Destination', 'Packet Loss (%)'),
                         ((k, v) for k, v in res['data'].items()))
