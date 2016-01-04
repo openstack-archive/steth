@@ -1,0 +1,13 @@
+# Just for CentOS 7
+[Unit]
+Description=OpenStack Neutron Debug Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python /usr/bin/stetho-agent
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
