@@ -35,6 +35,7 @@ COMMAND_V1 = {
     'ping': agent_api.AgentPing,
     'check-ports-on-br': agent_api.CheckPortsOnBr,
     'get-interface': agent_api.GetInterface,
+    'check-vlan-interface': agent_api.CheckVlanInterface,
 }
 
 COMMANDS = {'0.1': COMMAND_V1}
