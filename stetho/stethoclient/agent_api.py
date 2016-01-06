@@ -112,6 +112,9 @@ class SetUpLink(Lister):
             # Get Link info
             res = server.get_interface(parsed_args.interface)
             self.log.debug('Response is %s' % res)
+            if res['code'] == 1:
+                Logger.log_fail(res['message'])
+                sys.exit()
             if res['code'] == 0:
                 return (('Field', 'Value'),
                         ((k, v) for k, v in res['data'].items()))
@@ -139,6 +142,9 @@ class GetInterface(Lister):
         try:
             res = server.get_interface(parsed_args.interface)
             self.log.debug('Response is %s' % res)
+            if res['code'] == 1:
+                Logger.log_fail(res['message'])
+                sys.exit()
             if res['code'] == 0:
                 return (('Field', 'Value'),
                         ((k, v) for k, v in res['data'].items()))
@@ -173,6 +179,9 @@ class AddVlanToInterface(Lister):
             new_interface = parsed_args.interface + '.' + parsed_args.vlan_id
             res = server.get_interface(new_interface)
             self.log.debug('Response is %s' % res)
+            if res['code'] == 1:
+                Logger.log_fail(res['message'])
+                sys.exit()
             if res['code'] == 0:
                 return (('Field', 'Value'),
                         ((k, v) for k, v in res['data'].items()))
@@ -205,6 +214,9 @@ class AgentPing(Lister):
                               timeout=parsed_args.timeout,
                               interface=parsed_args.interface)
             self.log.debug('Response is %s' % res)
+            if res['code'] == 1:
+                Logger.log_fail(res['message'])
+                sys.exit()
             if res['code'] == 0:
                 return (('Destination', 'Packet Loss (%)'),
                         ((k, v) for k, v in res['data'].items()))
@@ -232,6 +244,9 @@ class CheckPortsOnBr(Lister):
             res = server.check_ports_on_br(parsed_args.bridge,
                                            parsed_args.port)
             self.log.debug('Response is %s' % res)
+            if res['code'] == 1:
+                Logger.log_fail(res['message'])
+                sys.exit()
             if res['code'] == 0:
                 return (('Port', 'Exists'),
                         ((k, v) for k, v in res['data'].items()))
@@ -258,6 +273,19 @@ class CheckVlanInterface(Lister):
         serverB = setup_server(parsed_args.agentB)
         try:
             interface = parsed_args.interface + '.' + parsed_args.vlan_id
+            # First of all, check the interface if exists
+            resA = serverA.get_interface(interface)
+            resB = serverB.get_interface(interface)
+            if resA['code'] == 1:
+                msg = "Agent: %s has no interface named %s!" % (
+                    parsed_args.agentA, interface)
+                Logger.log_fail(msg)
+                sys.exit()
+            if resB['code'] == 1:
+                msg = "Agent: %s has no interface named %s!" % (
+                    parsed_args.agentB, interface)
+                Logger.log_fail(msg)
+                sys.exit()
             # add vlan interface in each agent
             resA = serverA.add_vlan_to_interface(parsed_args.interface,
                                                  parsed_args.vlan_id)

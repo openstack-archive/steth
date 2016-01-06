@@ -14,14 +14,15 @@
 #    under the License.
 
 import sys
+
 from setuptools import setup, find_packages
+
 # In CentOS6.5, the version of python is 2.6, and in CentOS7 the version of
 # python is 2.7. So we can according by the python version to put the
 # stetho-agent script to the right place.
 #
 # If in CentOS6.5, the init script should be placed in "/etc/init.d/"
 # If in CentOS7, the init script should be placed in "/etc/systemd/system/"
-#
 CENTOS6 = '/etc/init.d/'
 CENTOS7 = '/etc/systemd/system/'
 CENTOS6_SCRIPT = 'etc/init.d/stetho-agent'
@@ -43,12 +44,12 @@ setup(name='stetho',
       url = "https://www.ustack.com",
       data_files=[
               ('/etc/stetho', ['etc/stetho.conf']),
-             (AGENT_INIT_SCRIPT, [SCRIPT_LOCATION]),
+              (AGENT_INIT_SCRIPT, [SCRIPT_LOCATION]),
 
       ],
       entry_points={
           'console_scripts': [
-              'stetho = stetho.stethoclient.stethoclient.shell:main',
+              'stetho = stetho.stethoclient.shell:main',
               'stetho-agent = stetho.agent.agent:main',
           ]
       }
