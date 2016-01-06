@@ -48,7 +48,7 @@ setup(name='stetho',
       ],
       entry_points={
           'console_scripts': [
-              'stetho = stetho.stethoclient.shell:main',
+              'stetho = stetho.stethoclient.stethoclient.shell:main',
               'stetho-agent = stetho.agent.agent:main',
           ]
       }
