@@ -20,12 +20,6 @@ logfile="/var/log/$prog/server.log"
 lockfile=/var/lock/subsys/$prog-agent
 
 start() {
-    if [ ! -d "/var/run/"$prog ]; then
-        mkdir "/var/run/"$prog
-    fi
-    if [ ! -f $pidfile ]; then
-        touch $pidfile
-    fi
     [ -x $exec ] || exit 5
     echo -n $"Starting $prog: "
     daemon --user neutron --pidfile $pidfile "$exec & echo \$! > $pidfile"
