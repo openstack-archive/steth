@@ -2,3 +2,4 @@ jsonrpclib
 netaddr
 mock
 cliff
+oslo.config>=1.6.0
