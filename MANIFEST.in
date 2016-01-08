@@ -1,0 +1,4 @@
+include etc/*
+include doc/*
+include LICENSE
+include README.md
