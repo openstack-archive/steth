@@ -13,19 +13,26 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
 import re
 import time
+import tempfile
+import signal
 import shlex
 import subprocess
 import platform
 from threading import Timer
 from stetho.agent.common import resource
+from stetho.agent.common import log
+
+LOG = log.get_logger()
 
 
 def execute(cmd, shell=False, root=False, timeout=10):
     try:
         if root:
             cmd.insert(0, 'sudo')
+        LOG.info(cmd)
         subproc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, shell=shell)
         timer = Timer(timeout, lambda proc: proc.kill(), [subproc])
@@ -41,7 +48,29 @@ def execute(cmd, shell=False, root=False, timeout=10):
 
         return stdcode, list_strip(stderr) if stdcode else list_strip(stdout)
     except Exception as e:
+        LOG.error(e)
         raise
+
+
+def create_deamon(cmd, shell=False, root=False):
+    """Usage:
+        Create servcice process.
+    """
+    try:
+        if root:
+            cmd.insert(0, 'sudo')
+        LOG.info(cmd)
+        subproc = subprocess.Popen(cmd, shell=shell, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        stdcode = subproc.returncode
+        return subproc.pid
+    except Exception as e:
+        LOG.error(e)
+        raise
+
+
+def kill_process_by_id(pid):
+    os.kill(int(pid), signal.SIGKILL)
 
 
 def get_interface(interface):
@@ -114,6 +143,7 @@ def register_api(server, api_obj):
     methods = dir(api_obj)
     apis = filter(lambda m: not m.startswith('_'), methods)
     [server.register_function(getattr(api_obj, api)) for api in apis]
+    LOG.info("Registered api %s" % apis)
 
 
 def make_response(code=0, message='', data=dict()):
@@ -122,3 +152,10 @@ def make_response(code=0, message='', data=dict()):
     response['message'] = '' if message is None else message
     response['data'] = dict() if data is None else data
     return response
+
+
+def replace_file(file_name, mode=0o644):
+    base_dir = os.path.dirname(os.path.abspath(file_name))
+    tmp_file = tempfile.NamedTemporaryFile('w+', dir=base_dir, delete=False)
+    os.chmod(tmp_file.name, mode)
+    os.rename(tmp_file.name, file_name)

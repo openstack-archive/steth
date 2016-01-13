@@ -15,7 +15,7 @@
 
 import mock
 import unittest
-
+import types
 import platform
 from stetho.agent.common import utils
 
@@ -25,6 +25,11 @@ class TestUtils(unittest.TestCase):
     def setUp(self):
         self.test_file = self.get_temp_file_path('test_execute.tmp')
         open(self.test_file, 'w+').close()
+        self.pids = list()
+
+    def tearDown(self):
+        for pid in self.pids:
+            utils.kill_process_by_id(pid)
 
     def test_execute(self):
         expected = "%s\n" % self.test_file
@@ -73,3 +78,9 @@ class TestUtils(unittest.TestCase):
         # test other distribution
         platform.linux_distribution = mock.Mock(return_value=['', '6.6', ''])
         self.assertEqual(utils.get_interface('eth0')[0], 1)
+
+    def test_create_deamon(self):
+        cmd = ['ping', '1.2.4.8']
+        pid = utils.create_deamon(cmd)
+        self.pids.append(pid)
+        self.assertEqual(type(pid), types.IntType)
