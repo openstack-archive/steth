@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
 import mock
 import unittest
 import types
@@ -80,7 +81,13 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(utils.get_interface('eth0')[0], 1)
 
     def test_create_deamon(self):
-        cmd = ['ping', '1.2.4.8']
+        cmd = ["ls", self.test_file]
         pid = utils.create_deamon(cmd)
         self.pids.append(pid)
         self.assertEqual(type(pid), types.IntType)
+
+    def test_kill_process_by_id(self):
+        pid = 100
+        os.kill = mock.Mock()
+        utils.kill_process_by_id(pid)
+        self.assertEqual(os.kill.called, True)
