@@ -21,10 +21,10 @@ Stetho is just like a self-checking tool for openstack networking, work in ml2 w
 ## Multiple Node Architecture
 
 ```
-                                                                       note that stetho will not save any state,
-                                                                       it just like a rpc client to make request
-                                                                       to stetho agent and analyse result.
-                                    +--------------------------+
+                                                                  note that stetho will not save
+                                                                  any state, it just like a rpc
+                                                                  client to make request to stetho
+                                    +--------------------------+  agent and analyse result.
                                     |                          |
                                     |   +----CLI-----------+   |
                                     |   |                  |   |
