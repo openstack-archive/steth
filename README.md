@@ -15,8 +15,7 @@ Besides, with some well-deployed architecture, check problem of vm networking is
 
 ## Mission
 
-Stetho is just like a self-checking tool for openstack networking, work in ml2 with ovs will maximize the effects for now.Stetho is just like a self-checking tool for openstack networking, 
-
+Stetho is just like a self-checking tool for openstack networking, work in ml2 with ovs will maximize the effects for now.
 
 ## Multiple Node Architecture
 
