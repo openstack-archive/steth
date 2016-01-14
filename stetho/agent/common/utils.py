@@ -80,6 +80,7 @@ def kill_process_by_id(pid):
     os.kill(pid, signal.SIGILL)
     os.waitpid(pid, 0)
 
+
 def get_interface(interface):
     """Support Centos standard physical interface,
        such as eth0.

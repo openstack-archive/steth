@@ -154,7 +154,7 @@ class AgentApi(object):
         iperf = iperf_driver.IPerfDriver()
         try:
             data = iperf.start_client(host, protocol='TCP', timeout=5,
-                               parallel=None, bandwidth=None)
+                                      parallel=None, bandwidth=None)
             data['server_ip'] = host
             return agent_utils.make_response(code=0, data=data)
         except Exception as e:
