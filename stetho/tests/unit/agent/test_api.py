@@ -17,6 +17,7 @@ import mock
 import unittest
 from stetho.agent import api
 from stetho.agent.common import utils as agent_utils
+from stetho.agent.drivers import iperf as iperf_driver
 
 
 class TestApi(unittest.TestCase):
@@ -66,4 +67,20 @@ class TestApi(unittest.TestCase):
         self.assertEqual(agent_utils.make_response.called, True)
         agent_utils.execute = mock.Mock(return_value=(1, stdout))
         self.agent_api.teardown_link('eth0')
+        self.assertEqual(agent_utils.make_response.called, True)
+
+    def test_start_iperf_client(self):
+        agent_utils.create_deamon = mock.Mock(return_value=100)
+        self.agent_api.setup_iperf_server('UDP')
+        self.assertEqual(agent_utils.make_response.called, True)
+
+    def test_teardown_iperf_server(self):
+        agent_utils.kill_process_by_id = mock.Mock()
+        self.agent_api.setup_iperf_server(100)
+        self.assertEqual(agent_utils.make_response.called, True)
+
+    def test_start_client(self):
+        stdout = '[  3]  0.0- 3.0 sec   497 MBytes  1.39 Gbits/sec'
+        agent_utils.execute_wait = mock.Mock(return_value=(0, stdout, ''))
+        self.agent_api.start_iperf_client(host='127.0.0.1')
         self.assertEqual(agent_utils.make_response.called, True)
