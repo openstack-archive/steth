@@ -20,48 +20,50 @@ from stetho.agent.common import utils as agent_utils
 
 
 class TestApi(unittest.TestCase):
+    def setUp(self):
+        self.agent_api = api.AgentApi()
 
     def test_check_ports_on_br(self):
         agent_utils.execute = mock.Mock(return_value=(0, ['execute']))
         agent_utils.make_response = mock.Mock(return_value=dict())
-        api.check_ports_on_br()
+        self.agent_api.check_ports_on_br()
         self.assertEqual(agent_utils.execute.called, True)
         self.assertEqual(agent_utils.make_response.called, True)
         agent_utils.execute = mock.Mock(return_value=(1, ['execute']))
-        api.check_ports_on_br()
+        self.agent_api.check_ports_on_br()
         self.assertEqual(agent_utils.make_response.called, True)
 
     def test_ping(self):
         stdout = ['', '2 packets transmitted, 2 received, 0% packet loss', '']
         agent_utils.execute = mock.Mock(return_value=(0, stdout))
         agent_utils.make_response = mock.Mock(return_value=dict())
-        api.ping(['1.2.4.8', '1.2.4.9'])
+        self.agent_api.ping(['1.2.4.8', '1.2.4.9'])
         self.assertEqual(agent_utils.make_response.called, True)
         stdout = 'stdout'
         agent_utils.execute = mock.Mock(return_value=(0, stdout))
-        api.ping(['1.2.4.8', '1.2.4.9'])
+        self.agent_api.ping(['1.2.4.8', '1.2.4.9'])
         self.assertEqual(agent_utils.make_response.called, True)
 
     def test_get_interface(self):
         get_interface = mock.Mock(return_value=(0, '', dict()))
         agent_utils.get_interface = get_interface
-        api.get_interface()
+        self.agent_api.get_interface()
         self.assertEqual(agent_utils.get_interface.called, True)
 
     def test_set_link(self):
         stdout = ['', '']
         agent_utils.execute = mock.Mock(return_value=(0, stdout))
-        api.setup_link('eth0', '10.0.0.100/24')
+        self.agent_api.setup_link('eth0', '10.0.0.100/24')
         self.assertEqual(agent_utils.make_response.called, True)
         agent_utils.execute = mock.Mock(return_value=(1, stdout))
-        api.setup_link('eth0', '10.0.0.100/24')
+        self.agent_api.setup_link('eth0', '10.0.0.100/24')
         self.assertEqual(agent_utils.make_response.called, True)
 
     def test_teardown_link(self):
         stdout = ['', '']
         agent_utils.execute = mock.Mock(return_value=(0, stdout))
-        api.teardown_link('eth0')
+        self.agent_api.teardown_link('eth0')
         self.assertEqual(agent_utils.make_response.called, True)
         agent_utils.execute = mock.Mock(return_value=(1, stdout))
-        api.teardown_link('eth0')
+        self.agent_api.teardown_link('eth0')
         self.assertEqual(agent_utils.make_response.called, True)
