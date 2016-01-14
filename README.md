@@ -9,7 +9,7 @@ It is modelled as agent(s)/client in which a controller interacts with agents de
 
 ## Background
 
-OpenStck networking can be deloyed as different architecture such as ml2 with ovs(legacy and dvr), linux bridge, ovn, dragonflow and more. But they both need some enviroment prerequisites such as vlan is configure as we expect, bandwidth match our need, connection between nodes are active.
+OpenStck networking can be deloyed as different architecture such as ml2 with ovs(legacy and dvr), linux bridge, ovn, dragonflow and more. But they all need some enviroment prerequisites such as vlan need to be configured as we expect, bandwidth should match our need, connection between nodes should be active, etc.
 
 Besides, with some well-deployed architecture, check problem of vm networking is pretty difficult, like why vm can not get ip address, why it can't connect to Internet, etc. Stetho intergates some useful scripts or 3rd tools(like iperf, tcpdump, etc) to help operator track vm ntwork.
 
@@ -21,10 +21,10 @@ Stetho is just like a self-checking tool for openstack networking, work in ml2 w
 ## Multiple Node Architecture
 
 ```
-                                                                  note that stetho will not save
-                                                                  any state, it just like a rpc
-                                                                  client to make request to stetho
-                                    +--------------------------+  agent and analyse result.
+                                                                   note that stetho will not save
+                                                                   any state, it just like a rpc
+                                                                   client to make request to stetho
+                                    +--------------------------+   agent and analyse result.
                                     |                          |
                                     |   +----CLI-----------+   |
                                     |   |                  |   |
