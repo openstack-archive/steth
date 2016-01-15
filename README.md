@@ -9,21 +9,21 @@ It is modelled as agent(s)/client in which a controller interacts with agents de
 
 ## Background
 
-OpenStck networking can be deloyed as different architecture such as ml2 with ovs(legacy and dvr), linux bridge, ovn, dragonflow and more. But they all need some enviroment prerequisites such as vlan need to be configured as we expect, bandwidth should match our need, connection between nodes should be active, etc.
+OpenStack networking can be deloyed as different architectures, such as ML2 with OVS(legacy and DVR), Linux bridge, OVN, Dragonflow and so forth. However, they all need enviromental prerequisites. For instance, VLAN needs to be configured as we expect; bandwidth should meet our need; connection between nodes should be active, etc.
 
-Besides, with some well-deployed architecture, check problem of vm networking is pretty difficult, like why vm can not get ip address, why it can't connect to Internet, etc. Stetho intergates some useful scripts or 3rd tools(like iperf, tcpdump, etc) to help operator track vm ntwork.
+Besides, with some well-deployed architectures, troubleshooting for VM networking is difficult. For instance, why VM cannot get an IP address; or why it cannot connect to Internet, etc. Stetho integrates useful scripts and third party tools(like iperf, tcpdump, etc.) to help operators keep tracking on VM networking.
 
 ## Mission
 
-Stetho is just like a self-checking tool for openstack networking, work in ml2 with ovs will maximize the effects for now.
+Stetho is an introspection tool for OpenStack networking. Only proved to be working in ML2 with OVS for now.
 
 ## Multiple Node Architecture
 
 ```
-                                                                   note that stetho will not save
-                                                                   any state, it just like a rpc
-                                                                   client to make request to stetho
-                                    +--------------------------+   agent and analyse result.
+                                                                   note that stetho does not save
+                                                                   any states, it likes a rpc
+                                                                   client which makes requests to stetho
+                                    +--------------------------+   agent(s) and analyses the result.
                                     |                          |
                                     |   +----CLI-----------+   |
                                     |   |                  |   |
@@ -47,20 +47,18 @@ Stetho is just like a self-checking tool for openstack networking, work in ml2 w
 |  +----------v----------+ |        |  +----------v----------+ |         |  +----------v----------+ |
 |  | run command like:   | |        |  | run command like:   | |         |  | run command like:   | |
 |  | ping, iperf, tcpdump| |        |  | ping, iperf, tcpdump| |         |  | ping, iperf, tcpdump| |
-|  | or use scapy to send| |        |  | or use scapy to send| |         |  | or use scapy to send| |
-|  | packet              | |        |  | packet              | |         |  | packet              | |
 |  +---------------------+ |        |  +---------------------+ |         |  +---------------------+ |
 |                          |        |                          |         |                          |
 |                          |        |                          |         |                          |
 +--------------------------+        +--------------------------+         +--------------------------+
 ```
 
-In multiple nodes scenario, Stetho is a non-state cli and controller, it know location of eech stetho agent and will read config, interfact with openstack then downcall agents which need. 
+In multiple nodes scenario, Stetho is a steteless CLI and controller. It knows the location of each stetho agent and will read config files, interact with OpenStack, and following by sending signals to agents if it is needed. 
 
-Stetho Agent is introduced to manage process or run command send packet like DHCP Discory, should be installed in each compute and network node, and there IPs shoud be defined at config file of stetho controller.
+Stetho Agent is introduced to manage process or run command. It should be installed in each compute and network node, and their IPs should be defined at config file of stetho controller.
 
 ## Stetho Agent
 
-Linstening in 0.0.0.0:9698 waiting for rpc request.
+Linstening in 0.0.0.0:9698 and waiting for the rpc request.
 
-Note: for get_interface() agent api, we use ifconfig to get complete information. But output of ifconfig varies from a linux distribution to another, the api has been tested on centos 6.5 and 7.0, and not for any other distributions.
+Note: for get_interface() agent API, we use ifconfig to get full information. However, the output of ifconfig varies from a Linux distribution to another. The API has only been tested on CentOS 6.5 and 7.0, not any other distributions else.
