@@ -45,11 +45,18 @@ def execute(cmd, shell=False, root=False, timeout=10):
 
         def list_strip(lines):
             return [line.strip() for line in lines]
-
         return stdcode, list_strip(stderr) if stdcode else list_strip(stdout)
     except Exception as e:
         LOG.error(e)
         raise
+
+
+def execute_wait(cmd, shell=False, root=False):
+    subproc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, shell=shell)
+    stdout, stderr = subproc.communicate()
+    stdcode = subproc.returncode
+    return stdcode, stdout, stderr
 
 
 def create_deamon(cmd, shell=False, root=False):
@@ -62,7 +69,6 @@ def create_deamon(cmd, shell=False, root=False):
         LOG.info(cmd)
         subproc = subprocess.Popen(cmd, shell=shell, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
-        stdcode = subproc.returncode
         return subproc.pid
     except Exception as e:
         LOG.error(e)
@@ -70,7 +76,9 @@ def create_deamon(cmd, shell=False, root=False):
 
 
 def kill_process_by_id(pid):
-    os.kill(int(pid), signal.SIGKILL)
+    pid = int(pid)
+    os.kill(pid, signal.SIGILL)
+    os.waitpid(pid, 0)
 
 
 def get_interface(interface):

@@ -89,5 +89,6 @@ class TestUtils(unittest.TestCase):
     def test_kill_process_by_id(self):
         pid = 100
         os.kill = mock.Mock()
+        os.waitpid = mock.Mock()
         utils.kill_process_by_id(pid)
         self.assertEqual(os.kill.called, True)

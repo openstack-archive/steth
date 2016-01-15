@@ -16,6 +16,7 @@
 import re
 from netaddr import IPNetwork
 from stetho.agent.common import utils as agent_utils
+from stetho.agent.drivers import iperf as iperf_driver
 from stetho.agent.common import log
 
 LOG = log.get_logger()
@@ -127,3 +128,35 @@ class AgentApi(object):
         # execute failed.
         message = stdout.pop(0)
         return agent_utils.make_response(code=stdcode, message=message)
+
+    def setup_iperf_server(self, protocol='TCP', port=5001, window=None):
+        """iperf -s
+        """
+        iperf = iperf_driver.IPerfDriver()
+        try:
+            data = iperf.start_server(protocol='TCP', port=5001, window=None)
+            return agent_utils.make_response(code=0, data=data)
+        except:
+            message = 'Start iperf server failed!'
+            return agent_utils.make_response(code=1, message=message)
+
+    def teardown_iperf_server(self, pid):
+        iperf = iperf_driver.IPerfDriver()
+        try:
+            iperf.stop_server(pid)
+            return agent_utils.make_response(code=0)
+        except Exception as e:
+            message = e.message
+            return agent_utils.make_response(code=1, message=message)
+
+    def start_iperf_client(self, host, protocol='TCP', timeout=5,
+                           parallel=None, bandwidth=None):
+        iperf = iperf_driver.IPerfDriver()
+        try:
+            data = iperf.start_client(host, protocol='TCP', timeout=5,
+                                      parallel=None, bandwidth=None)
+            data['server_ip'] = host
+            return agent_utils.make_response(code=0, data=data)
+        except Exception as e:
+            message = e.message
+            return agent_utils.make_response(code=1, message=message)

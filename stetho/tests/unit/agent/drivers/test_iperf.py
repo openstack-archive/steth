@@ -29,6 +29,7 @@ class TestIPerfDriver(unittest.TestCase):
         self.assertEqual(data['pid'], 1000)
 
     def test_start_client(self):
-        utils.create_deamon = mock.Mock()
+        stdout = '[  3]  0.0- 3.0 sec   497 MBytes  1.39 Gbits/sec'
+        utils.execute_wait = mock.Mock(return_value=(0, stdout, ''))
         self.iperfd.start_client('127.0.0.1')
-        self.assertEqual(utils.create_deamon.called, True)
+        self.assertEqual(utils.execute_wait.called, True)
