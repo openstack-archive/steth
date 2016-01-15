@@ -9,7 +9,7 @@ It is modelled as agent(s)/client in which a controller interacts with agents de
 
 ## Background
 
-OpenStack networking can be deloyed as different architectures, such as ML2 with OVS(legacy and DVR), Linux bridge, OVN, Dragonflow and so forth. However, they all need enviromental prerequisites. For instance, VLAN needs to be configured as we expect; bandwidth should meet our need; connection between nodes should be active, etc.
+OpenStack networking can be deloyed as different architectures, such as ML2 with OVS(legacy and DVR), Linux bridge, OVN, Dragonflow and so forth. However, they all need enviromental prerequisites. For instance, VLAN needs to be configured as we expect; bandwidth should meet our requirements; connection between nodes should be active, etc.
 
 Besides, with some well-deployed architectures, troubleshooting for VM networking is difficult. For instance, why VM cannot get an IP address; or why it cannot connect to Internet, etc. Stetho integrates useful scripts and third party tools(like iperf, tcpdump, etc.) to help operators keep tracking on VM networking.
 
@@ -21,7 +21,7 @@ Stetho is an introspection tool for OpenStack networking. Only proved to be work
 
 ```
                                                                    note that stetho does not save
-                                                                   any states, it likes a rpc
+                                                                   any state, it acts as a rpc
                                                                    client which makes requests to stetho
                                     +--------------------------+   agent(s) and analyses the result.
                                     |                          |
@@ -47,15 +47,17 @@ Stetho is an introspection tool for OpenStack networking. Only proved to be work
 |  +----------v----------+ |        |  +----------v----------+ |         |  +----------v----------+ |
 |  | run command like:   | |        |  | run command like:   | |         |  | run command like:   | |
 |  | ping, iperf, tcpdump| |        |  | ping, iperf, tcpdump| |         |  | ping, iperf, tcpdump| |
+|  | or use scapy to send| |        |  | or use scapy to send| |         |  | or use scapy to send| |
+|  | packet              | |        |  | packet              | |         |  | packet              | |
 |  +---------------------+ |        |  +---------------------+ |         |  +---------------------+ |
 |                          |        |                          |         |                          |
 |                          |        |                          |         |                          |
 +--------------------------+        +--------------------------+         +--------------------------+
 ```
 
-In multiple nodes scenario, Stetho is a steteless CLI and controller. It knows the location of each stetho agent and will read config files, interact with OpenStack, and following by sending signals to agents if it is needed. 
+In multiple nodes scenario, Stetho is a steteless CLI and controller. It knows each stetho agent and will read config files, interact with OpenStack, and following by sending signals to agents if it is needed. 
 
-Stetho Agent is introduced to manage process or run command. It should be installed in each compute and network node, and their IPs should be defined at config file of stetho controller.
+Stetho Agent is introduced to manage processes or run commands. It should be installed in each compute and network node, and their IPs should be defined at config file of stetho controller.
 
 ## Stetho Agent
 
