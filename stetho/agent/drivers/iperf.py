@@ -60,8 +60,8 @@ class IPerfDriver(object):
                 out_dict.pop()
             out_data = out_dict[-1].split()
             data = dict()
-            data['Bandwidth'] = out_data[-2] + out_data[-1]
-            data['Transfer'] = out_data[-4] + out_data[-3]
+            data['Bandwidth'] = out_data[-2] + ' ' + out_data[-1]
+            data['Transfer'] = out_data[-4] + ' ' + out_data[-3]
             data['Interval'] = out_data[-6]
             return data
         raise Exception('Start iperf failed, please check on the node.')

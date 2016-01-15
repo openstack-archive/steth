@@ -2,6 +2,7 @@ import mock
 import unittest
 from stetho.stethoclient import shell
 from stetho.stethoclient import agent_api
+from stetho.stethoclient.drivers import iperf_api
 
 
 class TestStethoClientMethods(unittest.TestCase):
@@ -35,3 +36,9 @@ class TestStethoClientMethods(unittest.TestCase):
         agent_api.CheckPortsOnBr.take_action = mock.Mock(return_value=r)
         shell.main(['check-ports-on-br', 'agent-64', 'br0', 'a'])
         self.assertEqual(agent_api.CheckPortsOnBr.take_action.called, True)
+
+    def test_check_iperf(self):
+        r = (('Field', 'Value'), [])
+        iperf_api.CheckIperf.take_action = mock.Mock(return_value=r)
+        shell.main(['check-iperf', 'agent-64', 'agent-64'])
+        self.assertEqual(iperf_api.CheckIperf.take_action.called, True)
