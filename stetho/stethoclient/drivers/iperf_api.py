@@ -20,7 +20,6 @@ import socket
 import sys
 
 from cliff.lister import Lister
-from stetho.stethoclient.constants import AGENT_INFOS
 
 LISTEN_PORT = 9698
 
@@ -44,6 +43,15 @@ class Logger():
     @staticmethod
     def log_fail(info):
         print Logger.FAIL + info + Logger.ENDC
+
+try:
+    from stetho.stethoclient.constants import AGENT_INFOS
+except:
+    AGENT_INFOS = {
+        'agent-64': "127.0.0.1",
+        'agent-65': "127.0.0.1",
+    }
+    Logger.log_fail("Import stetho configure file fail. Use fake data!")
 
 
 def setup_server(agent):
