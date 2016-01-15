@@ -22,6 +22,7 @@ import logging
 from cliff import app
 from cliff import commandmanager
 from stetho.stethoclient import agent_api
+from stetho.stethoclient.drivers import iperf_api
 from stetho.stethoclient import strutils
 
 
@@ -36,6 +37,7 @@ COMMAND_V1 = {
     'check-ports-on-br': agent_api.CheckPortsOnBr,
     'get-interface': agent_api.GetInterface,
     'check-vlan-interface': agent_api.CheckVlanInterface,
+    'check-iperf': iperf_api.CheckIperf,
 }
 
 COMMANDS = {'0.1': COMMAND_V1}

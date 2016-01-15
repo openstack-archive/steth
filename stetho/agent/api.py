@@ -150,7 +150,7 @@ class AgentApi(object):
             return agent_utils.make_response(code=1, message=message)
 
     def start_iperf_client(self, host, protocol='TCP', timeout=5,
-                           parallel=None, bandwidth=None):
+                           parallel=None, bandwidth=None, port=5001):
         iperf = iperf_driver.IPerfDriver()
         try:
             data = iperf.start_client(host, protocol='TCP', timeout=5,
