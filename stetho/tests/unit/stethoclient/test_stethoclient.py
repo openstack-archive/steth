@@ -2,6 +2,7 @@ import mock
 import unittest
 from stetho.stethoclient import shell
 from stetho.stethoclient import agent_api
+from stetho.stethoclient.drivers import iperf_api
 
 
 class TestStethoClientMethods(unittest.TestCase):
