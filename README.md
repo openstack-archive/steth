@@ -47,6 +47,8 @@ Stetho is just like a self-checking tool for openstack networking, work in ml2 w
 |  +----------v----------+ |        |  +----------v----------+ |         |  +----------v----------+ |
 |  | run command like:   | |        |  | run command like:   | |         |  | run command like:   | |
 |  | ping, iperf, tcpdump| |        |  | ping, iperf, tcpdump| |         |  | ping, iperf, tcpdump| |
+|  | or use scapy to send| |        |  | or use scapy to send| |         |  | or use scapy to send| |
+|  | packet              | |        |  | packet              | |         |  | packet              | |
 |  +---------------------+ |        |  +---------------------+ |         |  +---------------------+ |
 |                          |        |                          |         |                          |
 |                          |        |                          |         |                          |
@@ -55,7 +57,7 @@ Stetho is just like a self-checking tool for openstack networking, work in ml2 w
 
 In multiple nodes scenario, Stetho is a non-state cli and controller, it know location of eech stetho agent and will read config, interfact with openstack then downcall agents which need. 
 
-Stetho Agent is introduced to manage process or run command, should be installed in each compute and network node, and there IPs shoud be defined at config file of stetho controller.
+Stetho Agent is introduced to manage process or run command send packet like DHCP Discory, should be installed in each compute and network node, and there IPs shoud be defined at config file of stetho controller.
 
 ## Stetho Agent
 
