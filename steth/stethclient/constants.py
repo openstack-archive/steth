@@ -17,16 +17,16 @@ from oslo_config import cfg
 
 OPTS = [
     cfg.ListOpt('network_agents_info', default=[],
-                help="Mappings of network agents and stetho listened IP."),
+                help="Mappings of network agents and steth listened IP."),
     cfg.ListOpt('compute_agents_info', default=[],
-                help="Mappings of compute agents and stetho listened IP."),
+                help="Mappings of compute agents and steth listened IP."),
     cfg.StrOpt('managed_network_prefix', default='127.0.0.',
                help="Managed network prefix."),
 ]
 
 cfg.CONF.register_opts(OPTS)
-cfg.CONF([], project='stetho',
-         default_config_files=['/etc/stetho/stetho.conf'])
+cfg.CONF([], project='steth',
+         default_config_files=['/etc/steth/steth.conf'])
 
 AGENT_INFOS = {}
 all_agents = cfg.CONF.network_agents_info + cfg.CONF.compute_agents_info

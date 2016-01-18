@@ -15,8 +15,8 @@
 
 import mock
 import unittest
-from stetho.agent import api
-from stetho.agent.common import utils as agent_utils
+from steth.agent import api
+from steth.agent.common import utils as agent_utils
 
 
 class TestApi(unittest.TestCase):

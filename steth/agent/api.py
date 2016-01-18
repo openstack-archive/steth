@@ -15,9 +15,9 @@
 
 import re
 from netaddr import IPNetwork
-from stetho.agent.common import utils as agent_utils
-from stetho.agent.drivers import iperf as iperf_driver
-from stetho.agent.common import log
+from steth.agent.common import utils as agent_utils
+from steth.agent.drivers import iperf as iperf_driver
+from steth.agent.common import log
 
 LOG = log.get_logger()
 

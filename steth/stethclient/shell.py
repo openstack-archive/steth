@@ -13,20 +13,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 """
-Command-line interface to Stetho APIs
+Command-line interface to Steth APIs
 """
 
 import sys
 
 from cliff import app
 from cliff import commandmanager
-from stetho.stethoclient import agent_api
-from stetho.stethoclient.drivers import iperf_api
-from stetho.stethoclient import strutils
+from steth.stethclient import agent_api
+from steth.stethclient.drivers import iperf_api
+from steth.stethclient import strutils
 
 
 VERSION = '0.1'
-STETHO_API_VERSION = '0.1'
+STETH_API_VERSION = '0.1'
 
 COMMAND_V1 = {
     'setup-link': agent_api.SetUpLink,
@@ -42,13 +42,13 @@ COMMAND_V1 = {
 COMMANDS = {'0.1': COMMAND_V1}
 
 
-class StethoShell(app.App):
+class StethShell(app.App):
 
     def __init__(self, apiversion):
-        super(StethoShell, self).__init__(
+        super(StethShell, self).__init__(
             description=__doc__.strip(),
             version=VERSION,
-            command_manager=commandmanager.CommandManager('stetho.cli'),
+            command_manager=commandmanager.CommandManager('steth.cli'),
         )
         self.commands = COMMANDS
         for k, v in self.commands[apiversion].items():
@@ -68,7 +68,7 @@ class StethoShell(app.App):
 
 def main(argv=sys.argv[1:]):
     try:
-        return StethoShell(STETHO_API_VERSION).run(
+        return StethShell(STETH_API_VERSION).run(
             list(map(strutils.safe_decode, argv)))
     except KeyboardInterrupt:
         print "... terminating neutron client"

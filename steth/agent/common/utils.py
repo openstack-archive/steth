@@ -20,8 +20,8 @@ import signal
 import subprocess
 import platform
 from threading import Timer
-from stetho.agent.common import resource
-from stetho.agent.common import log
+from steth.agent.common import resource
+from steth.agent.common import log
 
 LOG = log.get_logger()
 
