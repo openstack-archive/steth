@@ -1,0 +1,63 @@
+CHANGES
+=======
+
+* Refactor stethoclient unit test
+* Update README.md
+* Fix error
+* Fix unit test error
+* Upload iperf CLI
+* Update README.md
+* Update reademe
+* pep8 check
+* Complete iperf Agent api
+* Update README.md
+* Update README.md
+* Update README.md
+* Modify graph in readme
+* Add more details in reademe
+* Upload stethoclient unit tests code
+* Modify unittest: mock create_deamon
+* Add iperf driver
+* Move mock to test-requirements
+* use pbr replace setuptools
+* add MANIFEST.in file
+
+0.1.0
+-----
+
+* Remove unncessary code
+* Fix typo and change agent script's mode
+* Change position of stethoclient and fix bugs when check vlan
+* Change stethoclient configuration in setup.py
+* Copy the agent init script to the right location
+* Upload stetho-agent init script in CentOS6.5 and CentOS7
+* Fix typo
+* Fix syntax error and teardown links at last
+* Add check vlan in swith scenario
+* Fix typo
+* Implement record agent infos by config file
+* Correct README
+* Modify agent unittest
+* Add support for centos6.5 get_interface
+* Make stetho agent when install stetho
+* Install stetho and stethoclient in one time
+* Make count,timeout,interface optional
+* Fix: agent api ping()
+* Upload stethoclient with all APIs
+* Fix: hardcode in api check_ports_on_br
+* Fix pep8
+* Realize get interface and move stethoclient position
+* Update README.md
+* Update .travis.yml
+* Complete agent api
+* Fix: rpc framework and get_interface unittest
+* Implement rpc framework and get_interface unittest
+* Implement rpc framework and get_interface api
+* Add build status in readme
+* Init agent, common, unittest
+* Modify travis ci config
+* Add requirements.txt
+* Enable Travis CI
+* Fix typo of README
+* Init doc,etc,stetho
+* Initial commit

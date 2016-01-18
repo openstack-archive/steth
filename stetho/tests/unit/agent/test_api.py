@@ -17,7 +17,6 @@ import mock
 import unittest
 from stetho.agent import api
 from stetho.agent.common import utils as agent_utils
-from stetho.agent.drivers import iperf as iperf_driver
 
 
 class TestApi(unittest.TestCase):

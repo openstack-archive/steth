@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
 from stetho.agent.common import log
 from stetho.agent.common import utils
 
@@ -46,7 +45,7 @@ class IPerfDriver(object):
                      parallel=None, bandwidth=None):
         """iperf -D -c host -t 60
         """
-        cmd = ['iperf',  '-c', host, '-p', str(port), '-t', str(timeout)]
+        cmd = ['iperf', '-c', host, '-p', str(port), '-t', str(timeout)]
         if not (protocol, 'UDP'):
             cmd.append('-u')
         if parallel:

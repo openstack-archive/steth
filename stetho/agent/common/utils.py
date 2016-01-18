@@ -15,10 +15,8 @@
 
 import os
 import re
-import time
 import tempfile
 import signal
-import shlex
 import subprocess
 import platform
 from threading import Timer
@@ -137,7 +135,7 @@ def get_interface(interface):
                 return format_centos_6_5(inf)
             elif not cmp(linux_dist, '7.0'):
                 return format_centos_7_0(inf)
-        except Exception as e:
+        except Exception:
             message = stdout.pop(0)
             return stdcode, message, None
 

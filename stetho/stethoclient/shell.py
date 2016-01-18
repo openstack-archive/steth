@@ -17,7 +17,6 @@ Command-line interface to Stetho APIs
 """
 
 import sys
-import logging
 
 from cliff import app
 from cliff import commandmanager

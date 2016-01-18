@@ -74,7 +74,7 @@ class TestStethoClientMethods(unittest.TestCase):
         self.assertEqual(self.server.check_ports_on_br.called, True)
 
     def test_check_iperf(self):
-        iperf_server_r = {u'message': u'', u'code': 0, u'data': {u'pid': 1234}}
+        iperf_server_r = {'message': '', u'code': 0, 'data': {'pid': 1234}}
         iperf_client_r = {
             'message': '',
             'code': 0,
@@ -85,11 +85,11 @@ class TestStethoClientMethods(unittest.TestCase):
                 'server_ip': 'localhost'
             }
         }
-        teardown_iperf_r = {u'message': u'', u'code': 0, u'data': {}}
+        teardown_iperf_r = {'message': '', 'code': 0, 'data': {}}
         self.server.setup_iperf_server = mock.Mock(return_value=iperf_server_r)
         self.server.start_iperf_client = mock.Mock(return_value=iperf_client_r)
         self.server.teardown_iperf_server = mock.Mock(
-                                            return_value=teardown_iperf_r)
+            return_value=teardown_iperf_r)
         shell.main(['check-iperf', 'agent-64', 'agent-64'])
         self.assertEqual(self.server.setup_iperf_server.called, True)
         self.assertEqual(self.server.start_iperf_client.called, True)
