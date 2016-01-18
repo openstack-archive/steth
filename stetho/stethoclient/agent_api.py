@@ -90,7 +90,7 @@ class TearDownLink(Command):
         try:
             res = server.teardown_link(parsed_args.interface)
         except Exception as e:
-            self.log.error('Error %s has occured because: ' % (res, e))
+            self.log.error('Error %s has occured because: %s' % (res, e))
 
 
 class SetUpLink(Lister):

@@ -46,7 +46,7 @@ class TestStethoClientMethods(unittest.TestCase):
         self.assertEqual(self.server.get_interface.called, True)
 
     def test_stethoclient_add_vlan_to_interface(self):
-        r = {u'message': '', 'code': 0, 'data': {}}
+        r = {'message': '', 'code': 0, 'data': {}}
         rr = {'message': '', 'code': 0, 'data': {'name': 'eth0'}}
         self.server.add_vlan_to_interface = mock.Mock(return_value=r)
         self.server.get_interface = mock.Mock(return_value=rr)
@@ -54,13 +54,13 @@ class TestStethoClientMethods(unittest.TestCase):
         self.assertEqual(self.server.add_vlan_to_interface.called, True)
 
     def test_stethoclient_ping(self):
-        r = {u'message': '', 'code': 0, 'data': {'1.2.4.8': 100}}
+        r = {'message': '', 'code': 0, 'data': {'1.2.4.8': 100}}
         self.server.ping = mock.Mock(return_value=r)
         shell.main(['ping', 'agent-64', '1.2.4.8'])
         self.assertEqual(self.server.ping.called, True)
 
     def test_stethoclient_setup_link(self):
-        r = {u'message': '', 'code': 0, 'data': {}}
+        r = {'message': '', 'code': 0, 'data': {}}
         rr = {'message': '', 'code': 0, 'data': {'name': 'eth0'}}
         self.server.get_interface = mock.Mock(return_value=rr)
         self.server.setup_link = mock.Mock(return_value=r)
@@ -68,13 +68,13 @@ class TestStethoClientMethods(unittest.TestCase):
         self.assertEqual(self.server.setup_link.called, True)
 
     def test_stethoclint_check_ports_on_br(self):
-        r = {u'message': '', 'code': 0, 'data': {'ovs_port': True}}
+        r = {'message': '', 'code': 0, 'data': {'ovs_port': True}}
         self.server.check_ports_on_br = mock.Mock(return_value=r)
         shell.main(['check-ports-on-br', 'agent-64', 'br0', 'ovs_port'])
         self.assertEqual(self.server.check_ports_on_br.called, True)
 
     def test_check_iperf(self):
-        iperf_server_r = {'message': '', u'code': 0, 'data': {'pid': 1234}}
+        iperf_server_r = {'message': '', 'code': 0, 'data': {'pid': 1234}}
         iperf_client_r = {
             'message': '',
             'code': 0,
