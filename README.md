@@ -1,5 +1,4 @@
 # Stetho
-[![Build Status](https://travis-ci.org/unitedstack/stetho.svg?branch=master)](https://travis-ci.org/unitedstack/stetho)
 
 A network inspection tool for OpenStack.
 
