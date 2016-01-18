@@ -48,3 +48,4 @@ doc/source/_build/
 # git
 AUTHORS
 ChangeLog
+.DS_Store
