@@ -60,13 +60,11 @@ def setup_server(agent):
         log.debug('get agent:%s ip_address:%s' % (
             agent, AGENT_INFOS[agent]))
     else:
-        log.error('Agent %s not configured. Please check it.' % (
-                         agent))
+        log.error('Agent %s not configured. Please check it.' % (agent))
         sys.exit()
-    log.debug('Begin create connection with http://%s:9698.' % (
-                    agent))
-    server = jsonrpclib.Server('http://%s:%s' % (
-             AGENT_INFOS[agent], LISTEN_PORT))
+    log.debug('Begin create connection with http://%s:9698.' % (agent))
+    server = jsonrpclib.Server('http://%s:%s' %
+                               (AGENT_INFOS[agent], LISTEN_PORT))
     log.debug('Create connection with %s success.' % (agent))
     return server
 

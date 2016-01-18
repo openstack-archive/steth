@@ -20,7 +20,6 @@ import sys
 
 from cliff.command import Command
 from cliff.lister import Lister
-from json import JSONDecoder
 
 LISTEN_PORT = 9698
 SETUP_LINK_IP_PRE = "192.168.100."
@@ -63,13 +62,11 @@ def setup_server(agent):
         log.debug('get agent:%s ip_address:%s' % (
             agent, AGENT_INFOS[agent]))
     else:
-        log.error('Agent %s not configured. Please check it.' % (
-                         agent))
+        log.error('Agent %s not configured. Please check it.' % (agent))
         sys.exit()
-    log.debug('Begin create connection with http://%s:9698.' % (
-                    agent))
-    server = jsonrpclib.Server('http://%s:%s' % (
-             AGENT_INFOS[agent], LISTEN_PORT))
+    log.debug('Begin create connection with http://%s:9698.' % (agent))
+    server = jsonrpclib.Server('http://%s:%s' %
+                               (AGENT_INFOS[agent], LISTEN_PORT))
     log.debug('Create connection with %s success.' % (agent))
     return server
 
@@ -93,7 +90,7 @@ class TearDownLink(Command):
         try:
             res = server.teardown_link(parsed_args.interface)
         except Exception as e:
-            self.log.error('Error %s has occured.' % res)
+            self.log.error('Error %s has occured because: ' % (res, e))
 
 
 class SetUpLink(Lister):

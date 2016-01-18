@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import os
-import sys
 from SocketServer import ThreadingMixIn
 from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
 from stetho.agent import api as agent_api

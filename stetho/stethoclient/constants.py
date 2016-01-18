@@ -31,5 +31,5 @@ cfg.CONF([], project='stetho',
 AGENT_INFOS = {}
 all_agents = cfg.CONF.network_agents_info + cfg.CONF.compute_agents_info
 for agent in all_agents:
-    item = {'agent-'+agent: cfg.CONF.managed_network_prefix+agent}
+    item = {'agent-' + agent: cfg.CONF.managed_network_prefix + agent}
     AGENT_INFOS.update(item)
