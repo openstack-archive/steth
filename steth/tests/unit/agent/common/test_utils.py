@@ -18,7 +18,7 @@ import mock
 import unittest
 import types
 import platform
-from stetho.agent.common import utils
+from steth.agent.common import utils
 
 
 class TestUtils(unittest.TestCase):

@@ -45,13 +45,13 @@ class Logger():
         print Logger.FAIL + info + Logger.ENDC
 
 try:
-    from stetho.stethoclient.constants import AGENT_INFOS
+    from steth.stethclient.constants import AGENT_INFOS
 except:
     AGENT_INFOS = {
         'agent-64': "127.0.0.1",
         'agent-65': "127.0.0.1",
     }
-    Logger.log_fail("Import stetho configure file fail. Use fake data!")
+    Logger.log_fail("Import steth configure file fail. Use fake data!")
 
 
 def setup_server(agent):

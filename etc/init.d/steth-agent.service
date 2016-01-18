@@ -6,7 +6,7 @@ After=network.target
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/python /usr/bin/stetho-agent
+ExecStart=/usr/bin/python /usr/bin/steth-agent
 Restart=on-abort
 
 [Install]
