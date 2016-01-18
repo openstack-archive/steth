@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# stetho  OpenStack Software Defined Networking Debuging
+# steth  OpenStack Software Defined Networking Debuging
 #
 # chkconfig:   - 98 02
 # description: neutron provides an API to  \
@@ -10,7 +10,7 @@
 
 . /etc/rc.d/init.d/functions
 
-prog=stetho
+prog=steth
 exec="/usr/bin/$prog-agent"
 pidfile="/var/run/$prog/$prog.pid"
 logfile="/var/log/$prog/server.log"

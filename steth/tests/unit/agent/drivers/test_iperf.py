@@ -15,8 +15,8 @@
 
 import mock
 import unittest
-from stetho.agent.drivers import iperf
-from stetho.agent.common import utils
+from steth.agent.drivers import iperf
+from steth.agent.common import utils
 
 
 class TestIPerfDriver(unittest.TestCase):

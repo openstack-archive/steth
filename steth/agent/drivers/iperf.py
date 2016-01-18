@@ -13,8 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from stetho.agent.common import log
-from stetho.agent.common import utils
+from steth.agent.common import log
+from steth.agent.common import utils
 
 LOG = log.get_logger()
 

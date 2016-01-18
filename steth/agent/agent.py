@@ -15,9 +15,9 @@
 
 from SocketServer import ThreadingMixIn
 from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
-from stetho.agent import api as agent_api
-from stetho.agent.common import utils as agent_utils
-from stetho.agent.common import log
+from steth.agent import api as agent_api
+from steth.agent.common import utils as agent_utils
+from steth.agent.common import log
 
 # Listening endpoint
 LISTEN_ADDR = '0.0.0.0'
