@@ -68,7 +68,7 @@ class TestApi(unittest.TestCase):
         self.agent_api.teardown_link('eth0')
         self.assertEqual(agent_utils.make_response.called, True)
 
-    def test_start_iperf_client(self):
+    def test_start_iperf_server(self):
         agent_utils.create_deamon = mock.Mock(return_value=100)
         self.agent_api.setup_iperf_server('UDP')
         self.assertEqual(agent_utils.make_response.called, True)
@@ -78,8 +78,30 @@ class TestApi(unittest.TestCase):
         self.agent_api.setup_iperf_server(100)
         self.assertEqual(agent_utils.make_response.called, True)
 
-    def test_start_client(self):
+    def test_start_iperf_client(self):
         stdout = '[  3]  0.0- 3.0 sec   497 MBytes  1.39 Gbits/sec'
         agent_utils.execute_wait = mock.Mock(return_value=(0, stdout, ''))
         self.agent_api.start_iperf_client(host='127.0.0.1')
         self.assertEqual(agent_utils.make_response.called, True)
+
+    @mock.patch('steth.agent.drivers.pcap_driver.PcapDriver')
+    @mock.patch('steth.agent.drivers.scapy_driver.ScapyDriver')
+    def test_check_dhcp_on_comp(self, PcapDriver, ScapyDriver):
+        port_id = '27a9a962-8049-48c3-b77f-0653f8ee34df'
+        port_mac = 'fa:16:3e:18:fd:f7'
+        phy_iface = 'eth3'
+        net_type = 'vlan'
+        result = self.agent_api.check_dhcp_on_comp(port_id, port_mac,
+                                                   phy_iface, net_type)
+        self.assertEqual(result['code'], 0)
+
+    @mock.patch('steth.agent.drivers.pcap_driver.PcapDriver')
+    @mock.patch('steth.agent.drivers.scapy_driver.ScapyDriver')
+    def test_check_dhcp_on_comp_vxlan(self, PcapDriver, ScapyDriver):
+        port_id = '27a9a962-8049-48c3-b77f-0653f8ee34df'
+        port_mac = 'fa:16:3e:18:fd:f7'
+        phy_iface = 'eth3'
+        net_type = 'vxlan'
+        self.agent_api.check_dhcp_on_comp(port_id, port_mac,
+                                          phy_iface, net_type)
+        self.assertRaises(Exception())
