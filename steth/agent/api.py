@@ -14,10 +14,14 @@
 #    under the License.
 
 import re
+import time
 from netaddr import IPNetwork
 from steth.agent.common import utils as agent_utils
 from steth.agent.drivers import iperf as iperf_driver
+from steth.agent.drivers import scapy_driver
+from steth.agent.drivers import pcap_driver
 from steth.agent.common import log
+from steth.agent.common import constants
 
 LOG = log.get_logger()
 
@@ -160,3 +164,34 @@ class AgentApi(object):
         except Exception as e:
             message = e.message
             return agent_utils.make_response(code=1, message=message)
+
+    def check_dhcp_on_comp(self, port_id, port_mac,
+                           phy_iface, net_type='vlan'):
+        try:
+            pcap = pcap_driver.PcapDriver()
+            filter = '(udp and (port 68 or 67) and ether host %s)' % port_mac
+            listeners = pcap.setup_listener_on_comp(port_id, filter)
+            if not cmp(net_type, 'vlan'):
+                phy_listener = pcap.setup_listener(phy_iface, filter)
+            else:
+                # TODO(yaowei) vxlan subinterface
+                pass
+            scapy = scapy_driver.ScapyDriver()
+            scapy.send_dhcp_over_qvb(port_id, port_mac)
+            # NOTE(yaowei) thread sleep 2 seconds wait for dhcp reply.
+            time.sleep(2)
+            map(pcap.set_nonblock, listeners)
+            pcap.set_nonblock(phy_listener)
+            data = dict()
+            for listener in listeners:
+                vif_pre = listener.name[:constants.VIF_PREFIX_LEN]
+                data[vif_pre] = []
+                for packet in listener.readpkts():
+                    data[vif_pre].extend(scapy.get_dhcp_mt(str(packet[1])))
+            data[phy_listener.name] = []
+            for packet in phy_listener.readpkts():
+                data[phy_listener.name].extend(
+                    scapy.get_dhcp_mt(str(packet[1])))
+            return agent_utils.make_response(code=0, data=data)
+        except Exception as e:
+            return agent_utils.make_response(code=1, message=e.message)
