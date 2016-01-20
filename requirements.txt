@@ -3,3 +3,5 @@ jsonrpclib
 netaddr
 cliff
 oslo.config>=1.6.0
+scapy==2.2.0-dev
+pypcap

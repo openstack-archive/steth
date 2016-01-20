@@ -14,9 +14,12 @@
 #    under the License.
 
 import re
+import time
 from netaddr import IPNetwork
 from steth.agent.common import utils as agent_utils
 from steth.agent.drivers import iperf as iperf_driver
+from steth.agent.drivers import scapy_driver
+from steth.agent.drivers import pcap_driver
 from steth.agent.common import log
 
 LOG = log.get_logger()
@@ -156,6 +159,32 @@ class AgentApi(object):
             data = iperf.start_client(host, protocol='TCP', timeout=5,
                                       parallel=None, bandwidth=None)
             data['server_ip'] = host
+            return agent_utils.make_response(code=0, data=data)
+        except Exception as e:
+            message = e.message
+            return agent_utils.make_response(code=1, message=message)
+
+    def check_dhcp_on_comp(self, port_id, port_mac,
+                           phy_iface, net_type='vlan'):
+        try:
+            pcap = pcap_driver.PcapDriver()
+            filter = '(udp and (port 68 or 67) and ether host %s)' % port_mac
+            listeners = pcap.setup_listener_on_comp(port_id, filter)
+            if not cmp(net_type, 'vlan'):
+                listeners.append(pcap.setup_listener(phy_iface, filter))
+            else:
+                # TODO(yaowei) vxlan subinterface
+                pass
+            scapy = scapy_driver.ScapyDriver()
+            scapy.send_dhcp_over_qvb(port_id, port_mac)
+            # NOTE(yaowei) thread sleep 2 seconds wait for dhcp reply.
+            time.sleep(2)
+            map(pcap.set_nonblock, listeners)
+            data = dict()
+            for listener in listeners:
+                data[listener.name] = []
+                for packet in listener.readpkts():
+                    data[listener.name].append(scapy.get_dhcp_mt(packet[1]))
             return agent_utils.make_response(code=0, data=data)
         except Exception as e:
             message = e.message
