@@ -15,58 +15,13 @@
 #    under the License.
 
 import logging
-import jsonrpclib
 import socket
 import sys
 
 from cliff.lister import Lister
-
-LISTEN_PORT = 9698
-
-
-class Logger():
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-
-    @staticmethod
-    def log_normal(info):
-        print Logger.OKBLUE + info + Logger.ENDC
-
-    @staticmethod
-    def log_high(info):
-        print Logger.OKGREEN + info + Logger.ENDC
-
-    @staticmethod
-    def log_fail(info):
-        print Logger.FAIL + info + Logger.ENDC
-
-try:
-    from steth.stethclient.constants import AGENT_INFOS
-except:
-    AGENT_INFOS = {
-        'agent-64': "127.0.0.1",
-        'agent-65': "127.0.0.1",
-    }
-    Logger.log_fail("Import steth configure file fail. Use fake data!")
-
-
-def setup_server(agent):
-    log = logging.getLogger(__name__)
-    if agent in AGENT_INFOS:
-        log.debug('get agent:%s ip_address:%s' % (
-            agent, AGENT_INFOS[agent]))
-    else:
-        log.error('Agent %s not configured. Please check it.' % (agent))
-        sys.exit()
-    log.debug('Begin create connection with http://%s:9698.' % (agent))
-    server = jsonrpclib.Server('http://%s:%s' %
-                               (AGENT_INFOS[agent], LISTEN_PORT))
-    log.debug('Create connection with %s success.' % (agent))
-    return server
+from steth.stethclient.utils import Logger
+from steth.stethclient.utils import setup_server
+from steth.stethclient import utils
 
 
 def get_ip_by_hostname(hostname):
@@ -83,6 +38,7 @@ class CheckIperf(Lister):
         parser = super(CheckIperf, self).get_parser(prog_name)
         parser.add_argument('server_agent', default='bad')
         parser.add_argument('client_agent', default='bad')
+        parser.add_argument('iperf_server_ip', default='bad')
         parser.add_argument('--server_protocol', nargs='?', default='TCP')
         parser.add_argument('--server_port', nargs='?', default='5001')
         parser.add_argument('--client_protocol', nargs='?', default='TCP')
@@ -94,9 +50,18 @@ class CheckIperf(Lister):
 
     def take_action(self, parsed_args):
         self.log.debug('Get parsed_args: %s' % parsed_args)
+        # check iperf client ip if legal
+        if utils.is_ip(parsed_args.iperf_server_ip):
+            Logger.log_fail('IP address not legal')
+            sys.exit()
         server = setup_server(parsed_args.server_agent)
         client = setup_server(parsed_args.client_agent)
         iperf_server_pdid = None
+        # check iperf client ip exist
+        res = server.validate_ip(parsed_args.iperf_server_ip)
+        if res['code'] == 1:
+            Logger.log_fail(res['message'])
+            sys.exit()
         # setup iperf server
         res = server.setup_iperf_server(protocol=parsed_args.server_protocol,
                                         port=parsed_args.server_port)
@@ -107,12 +72,16 @@ class CheckIperf(Lister):
         if res['code'] == 0:
             msg = (('Iperf server setup success and runs in '
                     'pid:%s') % (res['data']['pid']))
-            Logger.log_high(msg)
+            self.log.debug(msg)
             iperf_server_pdid = res['data']['pid']
         # setup iperf client
-        host = get_ip_by_hostname(parsed_args.server_agent)
+        #try:
+        #    host = get_ip_by_hostname(parsed_args.server_agent)
+        #except Exception as e:
+        #    self.log.info("We can not resolve this name: %s",
+        #        (parsed_args.server_agent))
         res = client.start_iperf_client(protocol=parsed_args.client_protocol,
-                                        host=host,
+                                        host=parsed_args.iperf_server_ip,
                                         timeout=parsed_args.client_timeout,
                                         parallel=parsed_args.client_parallel,
                                         bandwidth=parsed_args.client_bandwidth,
@@ -122,10 +91,9 @@ class CheckIperf(Lister):
         r = server.teardown_iperf_server(iperf_server_pdid)
         if r['code'] == 1:
             Logger.log_fail(r['message'])
-            sys.exit()
         if r['code'] == 0:
             msg = (('Iperf server delete success and '
                     'pid:%s') % (iperf_server_pdid))
-            Logger.log_high(msg)
+            self.log.debug(msg)
         return (('Field', 'Value'),
                 ((k, v) for k, v in res['data'].items()))
