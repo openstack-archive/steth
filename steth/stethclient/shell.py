@@ -22,7 +22,7 @@ from cliff import app
 from cliff import commandmanager
 from steth.stethclient import agent_api
 from steth.stethclient.drivers import iperf_api
-from steth.stethclient import strutils
+from steth.stethclient import utils
 
 
 VERSION = '0.1'
@@ -69,7 +69,7 @@ class StethShell(app.App):
 def main(argv=sys.argv[1:]):
     try:
         return StethShell(STETH_API_VERSION).run(
-            list(map(strutils.safe_decode, argv)))
+            list(map(utils.safe_decode, argv)))
     except KeyboardInterrupt:
         print "... terminating neutron client"
         return 1
