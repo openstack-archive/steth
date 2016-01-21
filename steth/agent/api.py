@@ -47,6 +47,24 @@ class AgentApi(object):
         return agent_utils.make_response(code=stdcode,
                                          message=message)
 
+    def validate_ip(self, ip=None):
+        """Validate ip exist on agent.
+
+        ip addr show to ip
+        """
+        if not ip:
+            msg = "You must validate ip address"
+            return agent_utils.make_response(code=1,
+                                             message=msg)
+        LOG.info("RPC: validate_ip for %s" % ip)
+        cmd = ['ip', 'addr', 'show', 'to', ip]
+        stdcode, stdout = agent_utils.execute(cmd, root=True)
+        if stdout:
+            return agent_utils.make_response(code=0)
+        msg = "IP: %s doesn't exist!" % ip
+        return agent_utils.make_response(code=1,
+                                         message=msg)
+
     def ping(self, ips, boardcast=False,
              count=2, timeout=2, interface=None):
         """Ping host or broadcast.
