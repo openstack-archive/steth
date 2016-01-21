@@ -22,6 +22,8 @@ OPTS = [
                 help="Mappings of compute agents and steth listened IP."),
     cfg.StrOpt('managed_network_prefix', default='127.0.0.',
                help="Managed network prefix."),
+    cfg.StrOpt('node_name_prefix', default='server',
+               help="Name prefix of every node.")
 ]
 
 cfg.CONF.register_opts(OPTS)
@@ -31,5 +33,6 @@ cfg.CONF([], project='steth',
 AGENT_INFOS = {}
 all_agents = cfg.CONF.network_agents_info + cfg.CONF.compute_agents_info
 for agent in all_agents:
-    item = {'agent-' + agent: cfg.CONF.managed_network_prefix + agent}
+    name_prefix = cfg.CONF.node_name_prefix
+    item = {name_prefix + agent: cfg.CONF.managed_network_prefix + agent}
     AGENT_INFOS.update(item)
