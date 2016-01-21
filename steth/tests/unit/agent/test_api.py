@@ -83,3 +83,9 @@ class TestApi(unittest.TestCase):
         agent_utils.execute_wait = mock.Mock(return_value=(0, stdout, ''))
         self.agent_api.start_iperf_client(host='127.0.0.1')
         self.assertEqual(agent_utils.make_response.called, True)
+
+    def test_validate_ip(self):
+        stdout = ['', '']
+        agent_utils.execute = mock.Mock(return_value=(0, stdout))
+        self.agent_api.validate_ip('1.2.3.4')
+        self.assertEqual(agent_utils.make_response.called, True)

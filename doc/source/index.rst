@@ -55,13 +55,27 @@ Configuration File
 On start the client will read a configuration file. By default the configuration file is located at /etc/steth/steth.conf.
 Here is an example about the configuration file: ::
 
-    [DEFAULT]
-    # Prefix of managed network in every agent. End of '.'
-    # Example: "10.0.4."
-    manage_network_prefix=127.0.0.
-    # Network nodes info. Just need sequence number.
-    # Example: 64, 65, 66
-    network_agents_info=64,65,66
-    # Compute nodes info. Just need sequence number.
-    # Example: 67, 68
-    compute_agents_info=67,68
+  # (ListOpt) Order list of networks prefix.
+  # The first item is treated as a list.
+  # If multiple networks are used, we can be specified as s list.
+  # Specify the prefix of the networks to be used.
+  # The ending '.' -- specifier indicates the network range to be used.
+  # Example: "10.0.4.,192.168.10."
+  networks_prefix=127.0.0.,192.168.20.,1.1.1.
+
+  # (ListOpt) This is the identifier of the nodes in group of network nodes.
+  # Example: 64, 65, 66
+  network_agents_info=64,65,66
+
+  # (ListOpt) This is the identifier of the nodes in group of compute nodes.
+  # Example: 67, 68
+  compute_agents_info=67,68
+
+  # (StrOpt) Prefix to be used in naming every node. By default, this value
+  # is "server". We combine "node_name_prefix" with
+  # "network_agents_info", "compute_agents_info" to
+  # define nodes. Such as "server-64", "server-68" and so on.
+  # In every region, we give every node a specific name.
+  # Ensure that DNS can be resolved correctly.
+  # these names when doing iperf.
+  node_name_prefix=server-
