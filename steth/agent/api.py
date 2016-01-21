@@ -14,10 +14,14 @@
 #    under the License.
 
 import re
+import time
 from netaddr import IPNetwork
 from steth.agent.common import utils as agent_utils
 from steth.agent.drivers import iperf as iperf_driver
+from steth.agent.drivers import scapy_driver
+from steth.agent.drivers import pcap_driver
 from steth.agent.common import log
+from steth.agent.common import constants
 
 LOG = log.get_logger()
 
@@ -178,3 +182,61 @@ class AgentApi(object):
         except Exception as e:
             message = e.message
             return agent_utils.make_response(code=1, message=message)
+
+    def check_dhcp_on_comp(self, port_id, port_mac,
+                           phy_iface, net_type='vlan'):
+        try:
+            pcap = pcap_driver.PcapDriver()
+            filter = '(udp and (port 68 or 67) and ether host %s)' % port_mac
+            listeners = pcap.setup_listener_on_comp(port_id, filter)
+            if not cmp(net_type, 'vlan'):
+                phy_listener = pcap.setup_listener(phy_iface, filter)
+            else:
+                # TODO(yaowei) vxlan subinterface
+                raise Exception("network type %s not supported." % net_type)
+            scapy = scapy_driver.ScapyDriver()
+            scapy.send_dhcp_over_qvb(port_id, port_mac)
+            # NOTE(yaowei) thread sleep 2 seconds wait for dhcp reply.
+            time.sleep(2)
+            map(pcap.set_nonblock, listeners)
+            pcap.set_nonblock(phy_listener)
+            data = dict()
+            for listener in listeners:
+                vif_pre = listener.name[:constants.VIF_PREFIX_LEN]
+                data[vif_pre] = []
+                for packet in listener.readpkts():
+                    data[vif_pre].extend(scapy.get_dhcp_mt(str(packet[1])))
+            data[phy_listener.name] = []
+            for packet in phy_listener.readpkts():
+                data[phy_listener.name].append(
+                    scapy.get_dhcp_mt(str(packet[1])))
+            return agent_utils.make_response(code=0, data=data)
+        except Exception as e:
+            return agent_utils.make_response(code=1, message=e.message)
+
+    def check_dhcp_on_net(self, net_id, port_ip, phy_iface, net_type='vlan'):
+        if not cmp(net_type, 'vxlan'):
+            raise Exception("network type %s not supported." % net_type)
+        dhcp_ns = constants.DHCP_NS_PREFIX + net_id
+        # get tap interface in dhcp namespace
+        cmd = ['ip', 'netns', 'exec', dhcp_ns]
+        route_cmd = cmd + ['ip', 'r', 'show', 'default', '0.0.0.0/0']
+        stdcode, stdout = agent_utils.execute(route_cmd, root=True)
+        if stdcode != 0:
+            raise Exception(stdout.pop())
+        tap_iface = stdout.pop().split().pop()
+        arp_cmd = cmd + ['arping', '-I', tap_iface, '-c', '1', port_ip]
+        pcap = pcap_driver.PcapDriver()
+        filter = '(arp and host %s)' % port_ip
+        ifaces = ['br-int', 'ovsbr3', phy_iface]
+        listeners = map(lambda i: pcap.setup_listener(i, filter), ifaces)
+        agent_utils.execute(arp_cmd, root=True)
+        map(pcap.set_nonblock, listeners)
+        # unpack arp
+        data = dict()
+        scapy = scapy_driver.ScapyDriver()
+        for listener in listeners:
+            data[listener.name] = []
+            for packet in listener.readpkts():
+                data[listener.name].append(scapy.get_arp_op(str(packet[1])))
+        return agent_utils.make_response(code=0, data=data)

@@ -28,10 +28,6 @@ class TestUtils(unittest.TestCase):
         open(self.test_file, 'w+').close()
         self.pids = list()
 
-    def tearDown(self):
-        for pid in self.pids:
-            utils.kill_process_by_id(pid)
-
     def test_execute(self):
         expected = "%s\n" % self.test_file
         code, result = utils.execute(["ls", self.test_file])
@@ -51,7 +47,8 @@ class TestUtils(unittest.TestCase):
                                      para['data'])
         self.assertEqual(para, result)
 
-    def test_get_interface(self):
+    @mock.patch('steth.agent.common.utils.execute')
+    def test_get_interface(self, execute):
         # test centos 6.5
         platform.linux_distribution = mock.Mock(return_value=['', '6.5', ''])
         out = ['eth0      Link encap:Ethernet  HWaddr FA:16:3E:61:F2:CF',
@@ -62,7 +59,7 @@ class TestUtils(unittest.TestCase):
                'TX packets:10163 errors:0 dropped:0 overruns:0 carrier:0',
                'collisions:0 txqueuelen:1000',
                'RX bytes:19492218 (18.5 MiB)  TX bytes:1173768 (1.1 MiB)']
-        utils.execute = mock.Mock(return_value=(0, out))
+        execute.return_value = (0, out)
         self.assertEqual(utils.get_interface('eth0')[0], 0)
         # test centos 7.0
         platform.linux_distribution = mock.Mock(return_value=['', '7.0', ''])
@@ -74,7 +71,7 @@ class TestUtils(unittest.TestCase):
                'RX errors 0  dropped 0  overruns 0  frame 0',
                'TX packets 275332  bytes 91891644 (87.6 MiB)',
                'TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0']
-        utils.execute = mock.Mock(return_value=(0, out))
+        execute.return_value = (0, out)
         self.assertEqual(utils.get_interface('eth0')[0], 0)
         # test other distribution
         platform.linux_distribution = mock.Mock(return_value=['', '6.6', ''])

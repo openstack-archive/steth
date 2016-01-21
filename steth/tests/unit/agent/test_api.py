@@ -23,26 +23,19 @@ class TestApi(unittest.TestCase):
     def setUp(self):
         self.agent_api = api.AgentApi()
 
-    def test_check_ports_on_br(self):
-        agent_utils.execute = mock.Mock(return_value=(0, ['execute']))
-        agent_utils.make_response = mock.Mock(return_value=dict())
-        self.agent_api.check_ports_on_br()
-        self.assertEqual(agent_utils.execute.called, True)
-        self.assertEqual(agent_utils.make_response.called, True)
-        agent_utils.execute = mock.Mock(return_value=(1, ['execute']))
-        self.agent_api.check_ports_on_br()
-        self.assertEqual(agent_utils.make_response.called, True)
+    @mock.patch('steth.agent.common.utils.execute')
+    def test_check_ports_on_br(self, execute):
+        execute.return_value = (0, [''])
+        result = self.agent_api.check_ports_on_br('br-ex', 'eth3')
+        self.assertEqual(execute.called, True)
+        self.assertEqual(result['code'], 0)
 
-    def test_ping(self):
+    @mock.patch('steth.agent.common.utils.execute')
+    def test_ping(self, execute):
         stdout = ['', '2 packets transmitted, 2 received, 0% packet loss', '']
-        agent_utils.execute = mock.Mock(return_value=(0, stdout))
-        agent_utils.make_response = mock.Mock(return_value=dict())
-        self.agent_api.ping(['1.2.4.8', '1.2.4.9'])
-        self.assertEqual(agent_utils.make_response.called, True)
-        stdout = 'stdout'
-        agent_utils.execute = mock.Mock(return_value=(0, stdout))
-        self.agent_api.ping(['1.2.4.8', '1.2.4.9'])
-        self.assertEqual(agent_utils.make_response.called, True)
+        execute.return_value = (0, stdout)
+        result = self.agent_api.ping(['1.2.4.8', '1.2.4.9'])
+        self.assertEqual(result['code'], 0)
 
     def test_get_interface(self):
         get_interface = mock.Mock(return_value=(0, '', dict()))
@@ -50,42 +43,66 @@ class TestApi(unittest.TestCase):
         self.agent_api.get_interface()
         self.assertEqual(agent_utils.get_interface.called, True)
 
-    def test_set_link(self):
+    @mock.patch('steth.agent.common.utils.execute')
+    def test_set_link(self, execute):
         stdout = ['', '']
-        agent_utils.execute = mock.Mock(return_value=(0, stdout))
-        self.agent_api.setup_link('eth0', '10.0.0.100/24')
-        self.assertEqual(agent_utils.make_response.called, True)
-        agent_utils.execute = mock.Mock(return_value=(1, stdout))
-        self.agent_api.setup_link('eth0', '10.0.0.100/24')
-        self.assertEqual(agent_utils.make_response.called, True)
+        execute.return_value = (0, stdout)
+        result = self.agent_api.setup_link('eth0', '10.0.0.100/24')
+        self.assertEqual(result['code'], 0)
 
-    def test_teardown_link(self):
+    @mock.patch('steth.agent.common.utils.execute')
+    def test_teardown_link(self, execute):
         stdout = ['', '']
-        agent_utils.execute = mock.Mock(return_value=(0, stdout))
-        self.agent_api.teardown_link('eth0')
-        self.assertEqual(agent_utils.make_response.called, True)
-        agent_utils.execute = mock.Mock(return_value=(1, stdout))
-        self.agent_api.teardown_link('eth0')
-        self.assertEqual(agent_utils.make_response.called, True)
+        execute.return_value = (0, stdout)
+        result = self.agent_api.teardown_link('eth0')
+        self.assertEqual(result['code'], 0)
+        execute.return_value = (1, stdout)
+        result = self.agent_api.teardown_link('eth0')
+        self.assertEqual(result['code'], 1)
 
-    def test_start_iperf_client(self):
-        agent_utils.create_deamon = mock.Mock(return_value=100)
-        self.agent_api.setup_iperf_server('UDP')
-        self.assertEqual(agent_utils.make_response.called, True)
+    @mock.patch('steth.agent.common.utils.create_deamon')
+    def test_start_iperf_server(self, create_deamon):
+        create_deamon.return_value = 100
+        result = self.agent_api.setup_iperf_server('UDP')
+        self.assertEqual(result['code'], 0)
 
-    def test_teardown_iperf_server(self):
-        agent_utils.kill_process_by_id = mock.Mock()
-        self.agent_api.setup_iperf_server(100)
-        self.assertEqual(agent_utils.make_response.called, True)
+    @mock.patch('steth.agent.common.utils.kill_process_by_id')
+    def test_teardown_iperf_server(self, kill_process_by_id):
+        result = self.agent_api.setup_iperf_server(100)
+        self.assertEqual(result['code'], 0)
 
-    def test_start_client(self):
+    @mock.patch('steth.agent.common.utils.execute_wait')
+    def test_start_iperf_client(self, execute_wait):
         stdout = '[  3]  0.0- 3.0 sec   497 MBytes  1.39 Gbits/sec'
-        agent_utils.execute_wait = mock.Mock(return_value=(0, stdout, ''))
-        self.agent_api.start_iperf_client(host='127.0.0.1')
-        self.assertEqual(agent_utils.make_response.called, True)
+        execute_wait.return_value = (0, stdout, '')
+        result = self.agent_api.start_iperf_client(host='127.0.0.1')
+        self.assertEqual(result['code'], 0)
 
-    def test_validate_ip(self):
+    @mock.patch('steth.agent.common.utils.execute')
+    def test_validate_ip(self, execute):
         stdout = ['', '']
-        agent_utils.execute = mock.Mock(return_value=(0, stdout))
-        self.agent_api.validate_ip('1.2.3.4')
-        self.assertEqual(agent_utils.make_response.called, True)
+        execute.return_value = (0, stdout)
+        result = self.agent_api.validate_ip('1.2.3.4')
+        self.assertEqual(result['code'], 0)
+
+    @mock.patch('steth.agent.drivers.pcap_driver.PcapDriver')
+    @mock.patch('steth.agent.drivers.scapy_driver.ScapyDriver')
+    def test_check_dhcp_on_comp(self, PcapDriver, ScapyDriver):
+        port_id = '27a9a962-8049-48c3-b77f-0653f8ee34df'
+        port_mac = 'fa:16:3e:18:fd:f7'
+        phy_iface = 'eth3'
+        net_type = 'vlan'
+        result = self.agent_api.check_dhcp_on_comp(port_id, port_mac,
+                                                   phy_iface, net_type)
+        self.assertEqual(result['code'], 0)
+
+    @mock.patch('steth.agent.drivers.pcap_driver.PcapDriver')
+    @mock.patch('steth.agent.drivers.scapy_driver.ScapyDriver')
+    def test_check_dhcp_on_comp_vxlan(self, PcapDriver, ScapyDriver):
+        port_id = '27a9a962-8049-48c3-b77f-0653f8ee34df'
+        port_mac = 'fa:16:3e:18:fd:f7'
+        phy_iface = 'eth3'
+        net_type = 'vxlan'
+        self.agent_api.check_dhcp_on_comp(port_id, port_mac,
+                                          phy_iface, net_type)
+        self.assertRaises(Exception())
