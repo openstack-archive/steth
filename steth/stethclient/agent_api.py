@@ -15,60 +15,14 @@
 #    under the License.
 
 import logging
-import jsonrpclib
 import sys
 
 from cliff.command import Command
 from cliff.lister import Lister
+from steth.stethclient.utils import Logger
+from steth.stethclient.utils import setup_server
 
-LISTEN_PORT = 9698
 SETUP_LINK_IP_PRE = "192.168.100."
-
-
-class Logger():
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-
-    @staticmethod
-    def log_normal(info):
-        print Logger.OKBLUE + info + Logger.ENDC
-
-    @staticmethod
-    def log_high(info):
-        print Logger.OKGREEN + info + Logger.ENDC
-
-    @staticmethod
-    def log_fail(info):
-        print Logger.FAIL + info + Logger.ENDC
-
-
-try:
-    from steth.stethclient.constants import AGENT_INFOS
-except:
-    AGENT_INFOS = {
-        'agent-64': "127.0.0.1",
-        'agent-65': "127.0.0.1",
-    }
-    Logger.log_fail("Import steth configure file fail. Use fake data!")
-
-
-def setup_server(agent):
-    log = logging.getLogger(__name__)
-    if agent in AGENT_INFOS:
-        log.debug('get agent:%s ip_address:%s' % (
-            agent, AGENT_INFOS[agent]))
-    else:
-        log.error('Agent %s not configured. Please check it.' % (agent))
-        sys.exit()
-    log.debug('Begin create connection with http://%s:9698.' % (agent))
-    server = jsonrpclib.Server('http://%s:%s' %
-                               (AGENT_INFOS[agent], LISTEN_PORT))
-    log.debug('Create connection with %s success.' % (agent))
-    return server
 
 
 class TearDownLink(Command):

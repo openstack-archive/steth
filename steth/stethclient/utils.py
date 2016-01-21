@@ -13,7 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
+import jsonrpclib
 import six
+import socket
 import sys
 
 
@@ -53,3 +56,61 @@ def safe_decode(text, incoming=None, errors='strict'):
         # Also, UTF-8 is being used since it's an ASCII
         # extension.
         return text.decode('utf-8', errors)
+
+
+class Logger():
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+
+    @staticmethod
+    def log_normal(info):
+        print Logger.OKBLUE + info + Logger.ENDC
+
+    @staticmethod
+    def log_high(info):
+        print Logger.OKGREEN + info + Logger.ENDC
+
+    @staticmethod
+    def log_fail(info):
+        print Logger.FAIL + info + Logger.ENDC
+
+LISTEN_PORT = 9698
+
+try:
+    from steth.stethclient.constants import STETH_AGENT_INFOS
+except:
+    STETH_AGENT_INFOS = {
+        'agent-64': "127.0.0.1",
+        'agent-65': "127.0.0.1",
+    }
+    Logger.log_fail("Import steth configure file fail. Use fake data!")
+
+
+def setup_server(agent):
+    log = logging.getLogger(__name__)
+    if agent in STETH_AGENT_INFOS:
+        log.debug('get agent:%s ip_address:%s' % (
+            agent, STETH_AGENT_INFOS[agent]))
+    else:
+        log.error('Agent %s not configured. Please check it.' % (agent))
+        sys.exit()
+    log.debug('Begin create connection with http://%s:%s.' % (agent,
+              LISTEN_PORT))
+    server = jsonrpclib.Server('http://%s:%s' %
+                               (STETH_AGENT_INFOS[agent], LISTEN_PORT))
+    log.debug('Create connection with %s success.' % (agent))
+    return server
+
+
+def is_ip(addr):
+    try:
+        socket.inet_aton(addr)
+        # legal
+        return 0
+    except socket.error:
+        # Not legal
+        return 1
