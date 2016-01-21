@@ -74,6 +74,7 @@ class TestStethClientMethods(unittest.TestCase):
         self.assertEqual(self.server.check_ports_on_br.called, True)
 
     def test_check_iperf(self):
+        validate_ip_r = {'message': u'', 'code': 0, 'data': {}}
         iperf_server_r = {'message': '', 'code': 0, 'data': {'pid': 1234}}
         iperf_client_r = {
             'message': '',
@@ -88,11 +89,12 @@ class TestStethClientMethods(unittest.TestCase):
         teardown_iperf_r = {'message': '', 'code': 0, 'data': {}}
         self.server.setup_iperf_server = mock.Mock(return_value=iperf_server_r)
         self.server.start_iperf_client = mock.Mock(return_value=iperf_client_r)
+        self.server.validate_ip = mock.Mock(return_value=validate_ip_r)
         self.server.teardown_iperf_server = mock.Mock(
             return_value=teardown_iperf_r)
-        iperf_api.get_ip_by_hostname = mock.Mock(return_value='10.0.0.64')
-        shell.main(['check-iperf', 'agent-64', 'agent-64'])
+        #iperf_api.get_ip_by_hostname = mock.Mock(return_value='10.0.0.64')
+        shell.main(['check-iperf', 'agent-64', 'agent-64', '10.0.0.64'])
         self.assertEqual(self.server.setup_iperf_server.called, True)
-        self.assertEqual(iperf_api.get_ip_by_hostname.called, True)
         self.assertEqual(self.server.start_iperf_client.called, True)
+        self.assertEqual(self.server.validate_ip.called, True)
         self.assertEqual(self.server.teardown_iperf_server.called, True)
