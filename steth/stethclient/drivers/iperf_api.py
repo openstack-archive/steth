@@ -107,7 +107,7 @@ class CheckIperf(Lister):
         if res['code'] == 0:
             msg = (('Iperf server setup success and runs in '
                     'pid:%s') % (res['data']['pid']))
-            Logger.log_high(msg)
+            self.log.debug(msg)
             iperf_server_pdid = res['data']['pid']
         # setup iperf client
         host = get_ip_by_hostname(parsed_args.server_agent)
@@ -126,6 +126,6 @@ class CheckIperf(Lister):
         if r['code'] == 0:
             msg = (('Iperf server delete success and '
                     'pid:%s') % (iperf_server_pdid))
-            Logger.log_high(msg)
+            self.log.debug(msg)
         return (('Field', 'Value'),
                 ((k, v) for k, v in res['data'].items()))
