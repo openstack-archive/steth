@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
 import logging
 
 FORMAT = '%(asctime)s %(filename)s %(levelname)s %(message)s'
@@ -23,6 +24,9 @@ FILENAME = '/var/log/steth/steth-agent.log'
 def get_logger(filename=FILENAME, format=FORMAT,
                datefmt=DATEFMT, filemod='a+',
                level=logging.DEBUG):
+    log_dir = os.path.dirname(filename)
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
     logging.basicConfig(level=level, format=format, datefmt=datefmt,
                         filename=filename, filemod=filemod)
     log = logging.getLogger()

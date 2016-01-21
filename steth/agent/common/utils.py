@@ -22,6 +22,7 @@ import platform
 from threading import Timer
 from steth.agent.common import resource
 from steth.agent.common import log
+from steth.agent.common import constants
 
 LOG = log.get_logger()
 
@@ -165,3 +166,8 @@ def replace_file(file_name, mode=0o644):
     tmp_file = tempfile.NamedTemporaryFile('w+', dir=base_dir, delete=False)
     os.chmod(tmp_file.name, mode)
     os.rename(tmp_file.name, file_name)
+
+
+def get_vif_name(prefix, port_id):
+    requested_name = prefix + port_id
+    return requested_name[:constants.DEVICE_NAME_LEN]
