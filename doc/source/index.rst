@@ -55,27 +55,21 @@ Configuration File
 On start the client will read a configuration file. By default the configuration file is located at /etc/steth/steth.conf.
 Here is an example about the configuration file: ::
 
-  # (ListOpt) Order list of networks prefix.
-  # The first item is treated as a list.
-  # If multiple networks are used, we can be specified as s list.
-  # Specify the prefix of the networks to be used.
-  # The ending '.' -- specifier indicates the network range to be used.
-  # Example: "10.0.4.,192.168.10."
-  networks_prefix=127.0.0.,192.168.20.,1.1.1.
+ # (ListOpt) list of networks types.
+ # We may have multi network types in one node, such as mgmt, net and stroage.
+ # so this value should be a list.
+ # We seperate each item by ":". Treat first item as network type.
+ # The second is physical nic name. And the third is network_prefix.
+ # Example: "mgmt:eth0:1.1.1.,net:eth1:2.2.2.,storage:eth2:3.3.3."
+ network_types=mgmt:eth0:1.1.1.,net:eth1:2.2.2.,storage:eth2:3.3.3.
 
-  # (ListOpt) This is the identifier of the nodes in group of network nodes.
-  # Example: 64, 65, 66
-  network_agents_info=64,65,66
+ # (ListOpt) All nodes info. Just need sequence number.
+ # Example: 64, 65, 66
+ nodes_id=39,233,64,65,66
 
-  # (ListOpt) This is the identifier of the nodes in group of compute nodes.
-  # Example: 67, 68
-  compute_agents_info=67,68
-
-  # (StrOpt) Prefix to be used in naming every node. By default, this value
-  # is "server". We combine "node_name_prefix" with
-  # "network_agents_info", "compute_agents_info" to
-  # define nodes. Such as "server-64", "server-68" and so on.
-  # In every region, we give every node a specific name.
-  # Ensure that DNS can be resolved correctly.
-  # these names when doing iperf.
-  node_name_prefix=server-
+ # (StrOpt) Name prefix of every node. By default, this value
+ # is "server". We combine "node_name_prefix" with
+ # "nodes_id", to define nodes. Such as "server-64", "server-68"
+ # and so on. In every region, we give every node a specific name.
+ # Ensure that DNS can resolve the nodes.
+ node_name_prefix=server-
