@@ -81,27 +81,30 @@ class Logger():
 LISTEN_PORT = 9698
 
 try:
-    from steth.stethclient.constants import STETH_AGENT_INFOS
-except:
-    STETH_AGENT_INFOS = {
+    from steth.stethclient.constants import MGMT_AGENTS_INFOS
+    from steth.stethclient.constants import NET_AGENTS_INFOS
+    from steth.stethclient.constants import STORAGE_AGENTS_INFOS
+except Exception as e:
+    Logger.log_fail("Import configure file fail. Because: %s!" % e)
+    MGMT_AGENTS_INFOS = NET_AGENTS_INFOS = STORAGE_AGENTS_INFOS = {
         'agent-64': "127.0.0.1",
         'agent-65': "127.0.0.1",
     }
-    Logger.log_fail("Import steth configure file fail. Use fake data!")
 
 
 def setup_server(agent):
     log = logging.getLogger(__name__)
-    if agent in STETH_AGENT_INFOS:
+    if agent in MGMT_AGENTS_INFOS:
         log.debug('get agent:%s ip_address:%s' % (
-            agent, STETH_AGENT_INFOS[agent]))
+            agent, MGMT_AGENTS_INFOS[agent]))
     else:
         log.error('Agent %s not configured. Please check it.' % (agent))
         sys.exit()
-    log.debug('Begin create connection with http://%s:%s.' % (agent,
-              LISTEN_PORT))
+    log.debug('Begin create connection with http://%s:%s.' % (
+        agent,
+        LISTEN_PORT))
     server = jsonrpclib.Server('http://%s:%s' %
-                               (STETH_AGENT_INFOS[agent], LISTEN_PORT))
+                               (MGMT_AGENTS_INFOS[agent], LISTEN_PORT))
     log.debug('Create connection with %s success.' % (agent))
     return server
 
@@ -114,3 +117,20 @@ def is_ip(addr):
     except socket.error:
         # Not legal
         return 1
+
+
+def get_ip_from_agent(node, net_type):
+    from steth.stethclient.constants import MGMT_TYPE
+    from steth.stethclient.constants import NET_TYPE
+    from steth.stethclient.constants import STORAGE_TYPE
+    try:
+        if net_type == NET_TYPE:
+            return NET_AGENTS_INFOS[node]
+        elif net_type == MGMT_TYPE:
+            return MGMT_AGENTS_INFOS[node]
+        elif net_type == STORAGE_TYPE:
+            return STORAGE_AGENTS_INFOS[node]
+        else:
+            return 1
+    except Exception as e:
+        print "Can't get ip! Because: %s" % e
