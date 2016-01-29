@@ -92,9 +92,7 @@ class TestStethClientMethods(unittest.TestCase):
         self.server.validate_ip = mock.Mock(return_value=validate_ip_r)
         self.server.teardown_iperf_server = mock.Mock(
             return_value=teardown_iperf_r)
-        #iperf_api.get_ip_by_hostname = mock.Mock(return_value='10.0.0.64')
-        shell.main(['check-iperf', 'agent-64', 'agent-64', '10.0.0.64'])
+        shell.main(['check-iperf', 'agent-64', 'agent-64', 'mgmt'])
         self.assertEqual(self.server.setup_iperf_server.called, True)
         self.assertEqual(self.server.start_iperf_client.called, True)
-        self.assertEqual(self.server.validate_ip.called, True)
         self.assertEqual(self.server.teardown_iperf_server.called, True)
