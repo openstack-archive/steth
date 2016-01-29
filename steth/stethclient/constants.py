@@ -13,17 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import socket
+import sys
 from oslo_config import cfg
 
 OPTS = [
-    cfg.ListOpt('network_agents_info', default=[],
-                help="Mappings of network agents and steth listened IP."),
-    cfg.ListOpt('compute_agents_info', default=[],
-                help="Mappings of compute agents and steth listened IP."),
-    cfg.StrOpt('managed_network_prefix', default='127.0.0.',
-               help="Managed network prefix."),
-    cfg.ListOpt('networks_prefix', default=['127.0.0.', '192.168.10.'],
-                help="Networks prefix."),
+    cfg.ListOpt('network_types', default=[],
+                help="Mappings of network types and prefix of networks."),
+    cfg.ListOpt('nodes_id', default=[],
+                help="List of nodes."),
     cfg.StrOpt('node_name_prefix', default='server-',
                help="Prefix of every node."),
 ]
@@ -32,19 +30,60 @@ cfg.CONF.register_opts(OPTS)
 cfg.CONF([], project='steth',
          default_config_files=['/etc/steth/steth.conf'])
 
-all_agents = cfg.CONF.network_agents_info + cfg.CONF.compute_agents_info
+MGMT_AGENTS_INFOS = {}
+NET_AGENTS_INFOS = {}
+STORAGE_AGENTS_INFOS = {}
 
-# We use STETH_AGENT_INFOS to create connection to every node
-STETH_AGENT_INFOS = {}
+MGMT_TYPE = 'mgmt'
+NET_TYPE = 'net'
+STORAGE_TYPE = 'storage'
 
-# We use ALL_AGENT_INFOS to process iperf
-ALL_AGENT_INFOS = {}
-for agent in all_agents:
-    l = []
-    prefix = cfg.CONF.networks_prefix[0]
-    item = {cfg.CONF.node_name_prefix + agent: prefix + agent}
-    STETH_AGENT_INFOS.update(item)
-    for prefix in cfg.CONF.networks_prefix[1:]:
-        l.append(prefix + agent)
-        item = {cfg.CONF.node_name_prefix + agent: l}
-        ALL_AGENT_INFOS.update(item)
+MGMT_INTERFACE = None
+NET_INTERFACE = None
+STORAGE_INTERFACE = None
+
+
+def is_ip(addr):
+    try:
+        socket.inet_aton(addr)
+        # valid
+        return 0
+    except socket.error:
+        # invalid
+        return 1
+
+
+def check_ip_and_fill(agent_type, net_prefix):
+    d = {}
+    name_prefix = cfg.CONF.node_name_prefix
+    for node in cfg.CONF.nodes_id:
+        if not is_ip(net_prefix + node):
+            d[name_prefix + node] = net_prefix + node
+            agent_type.update(d)
+        else:
+            print "%s is not IP!" % name_prefix + node
+
+
+def validate_and_parse_network_types():
+    if not cfg.CONF.network_types:
+        print 'You must fill network_types in config file!'
+        sys.exit()
+    for network_type in cfg.CONF.network_types:
+        net_type, net_interface, net_prefix = network_type.split(':')
+        # parse mgmt networks
+        if net_type == MGMT_TYPE:
+            check_ip_and_fill(MGMT_AGENTS_INFOS, net_prefix)
+            global MGMT_INTERFACE
+            MGMT_INTERFACE = net_interface
+        # parse net networks
+        elif net_type == NET_TYPE:
+            check_ip_and_fill(NET_AGENTS_INFOS, net_prefix)
+            global NET_INTERFACE
+            NET_INTERFACE = net_interface
+        # parse stor networks
+        elif net_type == STORAGE_TYPE:
+            check_ip_and_fill(STORAGE_AGENTS_INFOS, net_prefix)
+            global STORAGE_INTERFACE
+            STORAGE_INTERFACE = net_interface
+        else:
+            print "Unkown network_types: %s" % network_type
