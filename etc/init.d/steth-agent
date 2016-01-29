@@ -22,7 +22,7 @@ lockfile=/var/lock/subsys/$prog-agent
 start() {
     [ -x $exec ] || exit 5
     echo -n $"Starting $prog: "
-    daemon --user neutron --pidfile $pidfile "$exec & echo \$! > $pidfile"
+    daemon --user neutron --pidfile $pidfile "$exec &>/dev/null & echo \$! > $pidfile"
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile
