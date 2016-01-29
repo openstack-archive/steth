@@ -19,9 +19,20 @@ import socket
 import sys
 
 from cliff.lister import Lister
+from steth.stethclient import utils
+from steth.stethclient.constants import MGMT_TYPE
+from steth.stethclient.constants import NET_TYPE
+from steth.stethclient.constants import STORAGE_TYPE
 from steth.stethclient.utils import Logger
 from steth.stethclient.utils import setup_server
-from steth.stethclient import utils
+
+try:
+    from steth.stethclient.constants import MGMT_AGENTS_INFOS
+    from steth.stethclient.constants import NET_AGENTS_INFOS
+    from steth.stethclient.constants import STORAGE_AGENTS_INFOS
+except Exception as e:
+    Logger.log_fail("Import configure file fail. Because: %s!" % e)
+    sys.exit()
 
 
 def get_ip_by_hostname(hostname):
@@ -38,7 +49,7 @@ class CheckIperf(Lister):
         parser = super(CheckIperf, self).get_parser(prog_name)
         parser.add_argument('server_agent', default='bad')
         parser.add_argument('client_agent', default='bad')
-        parser.add_argument('iperf_server_ip', default='bad')
+        parser.add_argument('iperf_server_type', default='mgmt')
         parser.add_argument('--server_protocol', nargs='?', default='TCP')
         parser.add_argument('--server_port', nargs='?', default='5001')
         parser.add_argument('--client_protocol', nargs='?', default='TCP')
@@ -47,6 +58,16 @@ class CheckIperf(Lister):
         parser.add_argument('--client_parallel', nargs='?', default=None)
         parser.add_argument('--client_bandwidth', nargs='?', default=None)
         return parser
+
+    def take_iperf_client(self, client, host, protocol,
+                          timeout, parallel, bandwidth, port):
+        res = client.start_iperf_client(protocol=protocol,
+                                        host=host,
+                                        timeout=timeout,
+                                        parallel=parallel,
+                                        bandwidth=bandwidth,
+                                        port=port)
+        return res
 
     def take_action(self, parsed_args):
         self.log.debug('Get parsed_args: %s' % parsed_args)
@@ -74,26 +95,84 @@ class CheckIperf(Lister):
                     'pid:%s') % (res['data']['pid']))
             self.log.debug(msg)
             iperf_server_pdid = res['data']['pid']
-        # setup iperf client
-        #try:
-        #    host = get_ip_by_hostname(parsed_args.server_agent)
-        #except Exception as e:
-        #    self.log.info("We can not resolve this name: %s",
-        #        (parsed_args.server_agent))
-        res = client.start_iperf_client(protocol=parsed_args.client_protocol,
-                                        host=parsed_args.iperf_server_ip,
-                                        timeout=parsed_args.client_timeout,
-                                        parallel=parsed_args.client_parallel,
-                                        bandwidth=parsed_args.client_bandwidth,
-                                        port=parsed_args.client_port)
-        self.log.debug('Response is %s' % res)
-        # kill iperf server
-        r = server.teardown_iperf_server(iperf_server_pdid)
-        if r['code'] == 1:
-            Logger.log_fail(r['message'])
-        if r['code'] == 0:
-            msg = (('Iperf server delete success and '
-                    'pid:%s') % (iperf_server_pdid))
-            self.log.debug(msg)
-        return (('Field', 'Value'),
-                ((k, v) for k, v in res['data'].items()))
+        if parsed_args.iperf_server_type == MGMT_TYPE or \
+           parsed_args.iperf_server_type == NET_TYPE or \
+           parsed_args.iperf_server_type == STORAGE_TYPE:
+            host = utils.get_ip_from_agent(parsed_args.server_agent,
+                                           parsed_args.iperf_server_type)
+            bandwidth = parsed_args.client_bandwidth
+            res = self.take_iperf_client(client=client,
+                                         protocol=parsed_args.client_protocol,
+                                         host=host,
+                                         timeout=parsed_args.client_timeout,
+                                         parallel=parsed_args.client_parallel,
+                                         bandwidth=bandwidth,
+                                         port=parsed_args.client_port)
+            self.log.debug('Response is %s' % res)
+            # kill iperf server
+            r = server.teardown_iperf_server(iperf_server_pdid)
+            if r['code'] == 1:
+                Logger.log_fail(r['message'])
+            if r['code'] == 0:
+                msg = (('Iperf server delete success and '
+                        'pid:%s') % (iperf_server_pdid))
+                self.log.debug(msg)
+            return (('Field', 'Value'),
+                    ((k, v) for k, v in res['data'].items()))
+        elif parsed_args.iperf_server_type == 'others':
+            mgmt_host = MGMT_AGENTS_INFOS[parsed_args.server_agent]
+            net_host = NET_AGENTS_INFOS[parsed_args.server_agent]
+            storage_host = STORAGE_AGENTS_INFOS[parsed_args.server_agent]
+            bandwidth = parsed_args.client_bandwidth
+            mgmt_res = self.take_iperf_client(
+                client=client,
+                protocol=parsed_args.client_protocol,
+                host=mgmt_host,
+                timeout=parsed_args.client_timeout,
+                parallel=parsed_args.client_parallel,
+                bandwidth=bandwidth,
+                port=parsed_args.client_port)
+            msg = "Process mgmt iperf success, begain net iperf..."
+            Logger.log_normal(msg)
+            net_res = self.take_iperf_client(
+                client=client,
+                protocol=parsed_args.client_protocol,
+                host=net_host,
+                timeout=parsed_args.client_timeout,
+                parallel=parsed_args.client_parallel,
+                bandwidth=bandwidth,
+                port=parsed_args.client_port)
+            msg = "Process net iperf success, begain storage iperf..."
+            Logger.log_normal(msg)
+            storage_res = self.take_iperf_client(
+                client=client,
+                protocol=parsed_args.client_protocol,
+                host=storage_host,
+                timeout=parsed_args.client_timeout,
+                parallel=parsed_args.client_parallel,
+                bandwidth=bandwidth,
+                port=parsed_args.client_port)
+            # kill iperf server
+            r = server.teardown_iperf_server(iperf_server_pdid)
+            if r['code'] == 1:
+                Logger.log_fail(r['message'])
+            if r['code'] == 0:
+                msg = (('Iperf server delete success and '
+                        'pid:%s') % (iperf_server_pdid))
+                self.log.debug(msg)
+            mgmt_data = [(k, v) for k, v in mgmt_res['data'].items()]
+            net_data = [(k, v) for k, v in net_res['data'].items()]
+            storage_data = [(k, v) for k, v in storage_res['data'].items()]
+            return (('Field', 'Value'),
+                    [('Mgmt Result', ' ')] +
+                    mgmt_data +
+                    [('Net Result', ' ')] +
+                    net_data +
+                    [('Storage Result', ' ')] +
+                    storage_data)
+        else:
+            msg = ("Get unsupport iperf server type: %s "
+                   "Please choose from net, mgmt, storage, others "
+                   % parsed_args.iperf_server_type)
+            Logger.log_fail(msg)
+            return (('Field', 'Value'), [(' ', ' ')])
