@@ -31,7 +31,7 @@ class TestPcapDriver(unittest.TestCase):
     @mock.patch('pcap.pcap')
     def test_setup_listener(self, pcap):
         self.pcap_dri.setup_listener(self.iface, self.filter)
-        pcap.assert_called_with(self.iface)
+        pcap.assert_called_with(self.iface, timeout_ms=2000)
         pcap(self.iface).setfilter.assert_called_with(self.filter)
 
     @mock.patch('steth.agent.drivers.pcap_driver.PcapDriver.setup_listener')

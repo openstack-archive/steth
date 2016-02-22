@@ -14,7 +14,6 @@
 #    under the License.
 
 import re
-import time
 from netaddr import IPNetwork
 from steth.agent.common import utils as agent_utils
 from steth.agent.drivers import iperf as iperf_driver
@@ -187,6 +186,7 @@ class AgentApi(object):
                            phy_iface, net_type='vlan'):
         try:
             pcap = pcap_driver.PcapDriver()
+            scapy = scapy_driver.ScapyDriver()
             filter = '(udp and (port 68 or 67) and ether host %s)' % port_mac
             listeners = pcap.setup_listener_on_comp(port_id, filter)
             if not cmp(net_type, 'vlan'):
@@ -194,18 +194,13 @@ class AgentApi(object):
             else:
                 # TODO(yaowei) vxlan subinterface
                 raise Exception("network type %s not supported." % net_type)
-            scapy = scapy_driver.ScapyDriver()
             scapy.send_dhcp_over_qvb(port_id, port_mac)
-            # NOTE(yaowei) thread sleep 2 seconds wait for dhcp reply.
-            time.sleep(2)
-            map(pcap.set_nonblock, listeners)
-            pcap.set_nonblock(phy_listener)
             data = dict()
             for listener in listeners:
                 vif_pre = listener.name[:constants.VIF_PREFIX_LEN]
                 data[vif_pre] = []
                 for packet in listener.readpkts():
-                    data[vif_pre].extend(scapy.get_dhcp_mt(str(packet[1])))
+                    data[vif_pre].append(scapy.get_dhcp_mt(str(packet[1])))
             data[phy_listener.name] = []
             for packet in phy_listener.readpkts():
                 data[phy_listener.name].append(

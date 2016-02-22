@@ -23,8 +23,8 @@ LOG = log.get_logger()
 
 class PcapDriver(object):
 
-    def setup_listener(self, iface, filter):
-        listener = pcap.pcap(iface)
+    def setup_listener(self, iface, filter, timeout=2):
+        listener = pcap.pcap(iface, timeout_ms=timeout * 1000)
         listener.setfilter(filter)
         return listener
 
