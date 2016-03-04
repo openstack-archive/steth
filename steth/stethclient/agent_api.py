@@ -65,22 +65,19 @@ class SetUpLink(Lister):
         self.log.debug('Interface is %s' % parsed_args.interface)
         self.log.debug('Cidr is %s' % parsed_args.cidr)
         server = setup_server(parsed_args.agent)
-        try:
-            # Setup Link
-            server.setup_link(parsed_args.interface,
-                              parsed_args.cidr)
-            # Get Link info
-            res = server.get_interface(parsed_args.interface)
-            self.log.debug('Response is %s' % res)
-            if res['code'] == 1:
-                Logger.log_fail(res['message'])
-                sys.exit()
-            if res['code'] == 0:
-                return (('Field', 'Value'),
-                        ((k, v) for k, v in res['data'].items()))
-        except Exception as e:
-            self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
+        # Setup Link
+        server.setup_link(parsed_args.interface,
+                          parsed_args.cidr)
+        # Get Link info
+        res = server.get_interface(parsed_args.interface)
+        self.log.debug('Response is %s' % res)
+        if res['code'] == 1:
+            Logger.log_fail(res['message'])
             sys.exit()
+        if res['code'] == 0:
+            return (('Field', 'Value'),
+                    ((k, v) for k, v in res['data'].items()))
+        return (['Error Mssage', ' '], [('message', res['message'])])
 
 
 class GetInterface(Lister):
