@@ -2,6 +2,7 @@ import mock
 import unittest
 from steth.stethclient import shell
 from steth.stethclient import agent_api
+from steth.stethclient.drivers import dhcp
 from steth.stethclient.drivers import iperf_api
 
 
@@ -31,6 +32,9 @@ class Server(object):
     def teardown_iperf_server(self):
         pass
 
+    def check_dhcp_on_comp(self):
+        pass
+
 
 class TestStethClientMethods(unittest.TestCase):
 
@@ -38,6 +42,7 @@ class TestStethClientMethods(unittest.TestCase):
         self.server = Server()
         agent_api.setup_server = mock.Mock(return_value=self.server)
         iperf_api.setup_server = mock.Mock(return_value=self.server)
+        dhcp.setup_server = mock.Mock(return_value=self.server)
 
     def test_stethclient_get_interface(self):
         r = {'message': '', 'code': 0, 'data': {'name': 'eth0'}}
@@ -96,3 +101,25 @@ class TestStethClientMethods(unittest.TestCase):
         self.assertEqual(self.server.setup_iperf_server.called, True)
         self.assertEqual(self.server.start_iperf_client.called, True)
         self.assertEqual(self.server.teardown_iperf_server.called, True)
+
+    @mock.patch('neutronclient.v2_0.client.Client.show_port')
+    def test_check_dhcp_on_comp(self, show_port):
+        show_port.return_value = {
+            'port': {
+                'mac_address': 'aa:bb:cc:dd:ee:ff',
+                'binding:host_id': 'server-9'
+            }
+        }
+        device = "tapaaaaaaaa-aa"
+        msg = device + "No such device exists (SIOCGIFHWADDR: No such device)"
+        check_dhcp_on_comp_r = {
+            'message': msg,
+            'code': 1,
+            'data': {}
+        }
+        self.server.check_dhcp_on_comp = mock.Mock(
+            return_value=check_dhcp_on_comp_r)
+        shell.main(['check-dhcp-on-comp',
+                    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+                    'eth0', 'vlan'])
+        self.assertEqual(self.server.check_dhcp_on_comp.called, True)
