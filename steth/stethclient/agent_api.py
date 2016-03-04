@@ -231,52 +231,49 @@ class CheckVlanInterface(Lister):
         self.log.debug('Get parsed_args: %s' % parsed_args)
         serverA = setup_server(parsed_args.agentA)
         serverB = setup_server(parsed_args.agentB)
-        try:
-            interface = parsed_args.interface + '.' + parsed_args.vlan_id
-            # First of all, check the interface if exists
-            resA = serverA.get_interface(interface)
-            resB = serverB.get_interface(interface)
-            if resA['code'] == 1:
-                msg = "Agent: %s has no interface named %s!" % (
-                    parsed_args.agentA, interface)
-                Logger.log_fail(msg)
-                sys.exit()
-            if resB['code'] == 1:
-                msg = "Agent: %s has no interface named %s!" % (
-                    parsed_args.agentB, interface)
-                Logger.log_fail(msg)
-                sys.exit()
-            # add vlan interface in each agent
-            resA = serverA.add_vlan_to_interface(parsed_args.interface,
-                                                 parsed_args.vlan_id)
-            self.log.debug('Response is %s' % resA)
-            resB = serverB.add_vlan_to_interface(parsed_args.interface,
-                                                 parsed_args.vlan_id)
-            self.log.debug('Response is %s' % resB)
-            Logger.log_normal(('AgentA and agentB has already added the '
-                               'interface %s ') % (interface))
-            # setup link in each agent
-            ipA = SETUP_LINK_IP_PRE + parsed_args.agentA.split('-')[1] + '/24'
-            resA = serverA.setup_link(interface, ipA)
-            self.log.debug('Response is %s' % resA)
-            ipB = SETUP_LINK_IP_PRE + parsed_args.agentB.split('-')[1] + '/24'
-            resB = serverB.setup_link(interface, ipB)
-            self.log.debug('Response is %s' % resB)
-            Logger.log_normal(('AgentA and agentB has already setup the '
-                               'IP %s and IP %s') % (ipA, ipB))
-            # ping a agent from exists IP to check connectivity
-            res = serverA.ping(ips=[ipB])
-            # teardown the interface in each agent to clean all resources
-            resA = serverA.teardown_link(interface)
-            self.log.debug('Response is %s' % resA)
-            resB = serverB.teardown_link(interface)
-            self.log.debug('Response is %s' % resB)
-            Logger.log_normal(('AgentA and agentB has already deleted the'
-                               'vlan %s in %s') % (parsed_args.vlan_id,
-                                                   parsed_args.interface))
-            if res['code'] == 0:
-                return (('Destination', 'Packet Loss (%)'),
-                        ((k, v) for k, v in res['data'].items()))
-        except Exception as e:
-            self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
+        interface = parsed_args.interface + '.' + parsed_args.vlan_id
+        # First of all, check the interface if exists
+        resA = serverA.get_interface(interface)
+        resB = serverB.get_interface(interface)
+        if resA['code'] == 1:
+            msg = "Agent: %s has no interface named %s!" % (
+                parsed_args.agentA, interface)
+            Logger.log_fail(msg)
             sys.exit()
+        if resB['code'] == 1:
+            msg = "Agent: %s has no interface named %s!" % (
+                parsed_args.agentB, interface)
+            Logger.log_fail(msg)
+            sys.exit()
+        # add vlan interface in each agent
+        resA = serverA.add_vlan_to_interface(parsed_args.interface,
+                                             parsed_args.vlan_id)
+        self.log.debug('Response is %s' % resA)
+        resB = serverB.add_vlan_to_interface(parsed_args.interface,
+                                             parsed_args.vlan_id)
+        self.log.debug('Response is %s' % resB)
+        Logger.log_normal(('AgentA and agentB has already added the '
+                           'interface %s ') % (interface))
+        # setup link in each agent
+        ipA = SETUP_LINK_IP_PRE + parsed_args.agentA.split('-')[1] + '/24'
+        resA = serverA.setup_link(interface, ipA)
+        self.log.debug('Response is %s' % resA)
+        ipB = SETUP_LINK_IP_PRE + parsed_args.agentB.split('-')[1] + '/24'
+        resB = serverB.setup_link(interface, ipB)
+        self.log.debug('Response is %s' % resB)
+        Logger.log_normal(('AgentA and agentB has already setup the '
+                           'IP %s and IP %s') % (ipA, ipB))
+        # ping a agent from exists IP to check connectivity
+        res = serverA.ping(ips=[ipB])
+        # teardown the interface in each agent to clean all resources
+        resA = serverA.teardown_link(interface)
+        self.log.debug('Response is %s' % resA)
+        resB = serverB.teardown_link(interface)
+        self.log.debug('Response is %s' % resB)
+        Logger.log_normal(('AgentA and agentB has already deleted the'
+                           'vlan %s in %s') % (parsed_args.vlan_id,
+                                               parsed_args.interface))
+        if res['code'] == 0:
+            return (('Destination', 'Packet Loss (%)'),
+                    ((k, v) for k, v in res['data'].items()))
+        return (['Error Mssage', ' '], [('message', res['message'])])
