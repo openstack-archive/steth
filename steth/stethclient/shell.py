@@ -37,6 +37,7 @@ COMMAND_V1 = {
     'get-interface': agent_api.GetInterface,
     'check-vlan-interface': agent_api.CheckVlanInterface,
     'check-iperf': iperf_api.CheckIperf,
+    'print-agents-info': agent_api.PrintAgentsInfo,
 }
 
 COMMANDS = {'0.1': COMMAND_V1}

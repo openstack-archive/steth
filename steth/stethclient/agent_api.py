@@ -280,3 +280,31 @@ class CheckVlanInterface(Lister):
         except Exception as e:
             self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
             sys.exit()
+
+
+class PrintAgentsInfo(Lister):
+    """Print all agents info."""
+
+    def get_parser(self, prog_name):
+        parser = super(PrintAgentsInfo, self).get_parser(prog_name)
+        return parser
+
+    def take_action(self, parsed_args):
+        try:
+            from steth.stethclient.constants import MGMT_AGENTS_INFOS
+            from steth.stethclient.constants import NET_AGENTS_INFOS
+            from steth.stethclient.constants import STORAGE_AGENTS_INFOS
+        except Exception as e:
+            Logger.log_fail("Import configure file fail. Because: %s!" % e)
+            sys.exit()
+
+        results = []
+        for agent in MGMT_AGENTS_INFOS.keys():
+            r = []
+            r.append(agent)
+            r.append(MGMT_AGENTS_INFOS[agent])
+            r.append(NET_AGENTS_INFOS[agent])
+            r.append(STORAGE_AGENTS_INFOS[agent])
+            results.append(r)
+        return (('Agent Name', 'Management IP', 'Network IP', 'Storage IP'),
+                results)
