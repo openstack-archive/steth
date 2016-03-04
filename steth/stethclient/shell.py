@@ -21,6 +21,7 @@ import sys
 from cliff import app
 from cliff import commandmanager
 from steth.stethclient import agent_api
+from steth.stethclient.drivers import dhcp
 from steth.stethclient.drivers import iperf_api
 from steth.stethclient import utils
 
@@ -37,6 +38,7 @@ COMMAND_V1 = {
     'get-interface': agent_api.GetInterface,
     'check-vlan-interface': agent_api.CheckVlanInterface,
     'check-iperf': iperf_api.CheckIperf,
+    'check-dhcp-on-comp': dhcp.CheckDHCPonComputeNodes,
 }
 
 COMMANDS = {'0.1': COMMAND_V1}
