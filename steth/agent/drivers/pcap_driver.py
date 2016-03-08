@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import pcap
+import pcapy
 from steth.agent.common import log
 from steth.agent.common import utils
 from steth.agent.common import constants
@@ -24,7 +24,7 @@ LOG = log.get_logger()
 class PcapDriver(object):
 
     def setup_listener(self, iface, filter, timeout=2):
-        listener = pcap.pcap(iface, timeout_ms=timeout * 1000)
+        listener = pcapy.pcapy(iface, timeout_ms=timeout * 1000)
         listener.setfilter(filter)
         return listener
 
