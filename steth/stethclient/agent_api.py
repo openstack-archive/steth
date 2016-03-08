@@ -167,22 +167,19 @@ class AgentPing(Lister):
     def take_action(self, parsed_args):
         self.log.debug('Get parsed_args: %s' % parsed_args)
         server = setup_server(parsed_args.agent)
-        try:
-            dest = parsed_args.destination.split(',')
-            res = server.ping(ips=dest,
-                              count=parsed_args.count,
-                              timeout=parsed_args.timeout,
-                              interface=parsed_args.interface)
-            self.log.debug('Response is %s' % res)
-            if res['code'] == 1:
-                Logger.log_fail(res['message'])
-                sys.exit()
-            if res['code'] == 0:
-                return (('Destination', 'Packet Loss (%)'),
-                        ((k, v) for k, v in res['data'].items()))
-        except Exception as e:
-            self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
+        dest = parsed_args.destination.split(',')
+        res = server.ping(ips=dest,
+                          count=parsed_args.count,
+                          timeout=parsed_args.timeout,
+                          interface=parsed_args.interface)
+        self.log.debug('Response is %s' % res)
+        if res['code'] == 1:
+            Logger.log_fail(res['message'])
             sys.exit()
+        if res['code'] == 0:
+            return (('Destination', 'Packet Loss (%)'),
+                    ((k, v) for k, v in res['data'].items()))
+        return (['Error Mssage', ' '], [('message', res['message'])])
 
 
 class CheckPortsOnBr(Lister):
