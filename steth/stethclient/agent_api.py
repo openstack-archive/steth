@@ -96,18 +96,12 @@ class GetInterface(Lister):
         self.log.debug('Agent is %s' % parsed_args.agent)
         self.log.debug('Interface is %s' % parsed_args.interface)
         server = setup_server(parsed_args.agent)
-        try:
-            res = server.get_interface(parsed_args.interface)
-            self.log.debug('Response is %s' % res)
-            if res['code'] == 1:
-                Logger.log_fail(res['message'])
-                sys.exit()
-            if res['code'] == 0:
-                return (('Field', 'Value'),
-                        ((k, v) for k, v in res['data'].items()))
-        except:
-            self.log.error('Agent %s return error!' % parsed_args.agent)
-            sys.exit()
+        res = server.get_interface(parsed_args.interface)
+        self.log.debug('Response is %s' % res)
+        if res['code'] == 0:
+            return (('Field', 'Value'),
+                    ((k, v) for k, v in res['data'].items()))
+        return (['Error Mssage', ' '], [('message', res['message'])])
 
 
 class AddVlanToInterface(Lister):
