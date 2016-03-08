@@ -98,6 +98,7 @@ class CheckIperf(Lister):
             host = utils.get_ip_from_agent(parsed_args.server_agent,
                                            parsed_args.iperf_server_type)
             bandwidth = parsed_args.client_bandwidth
+            # setup iperf client
             res = self.take_iperf_client(client=client,
                                          protocol=parsed_args.client_protocol,
                                          host=host,
@@ -129,7 +130,8 @@ class CheckIperf(Lister):
                 parallel=parsed_args.client_parallel,
                 bandwidth=bandwidth,
                 port=parsed_args.client_port)
-            msg = "Process mgmt iperf success, begain net iperf..."
+            msg = ("Start iperf client from MGMT network success. "
+                   "Begain network iperf...")
             Logger.log_normal(msg)
             net_res = self.take_iperf_client(
                 client=client,
@@ -139,7 +141,8 @@ class CheckIperf(Lister):
                 parallel=parsed_args.client_parallel,
                 bandwidth=bandwidth,
                 port=parsed_args.client_port)
-            msg = "Process net iperf success, begain storage iperf..."
+            msg = ("Start iperf client from NET network success. "
+                   "Begain storage iperf...")
             Logger.log_normal(msg)
             storage_res = self.take_iperf_client(
                 client=client,
@@ -157,19 +160,24 @@ class CheckIperf(Lister):
                 msg = (('Iperf server delete success and '
                         'pid:%s') % (iperf_server_pdid))
                 self.log.debug(msg)
-            mgmt_data = [(k, v) for k, v in mgmt_res['data'].items()]
-            net_data = [(k, v) for k, v in net_res['data'].items()]
-            storage_data = [(k, v) for k, v in storage_res['data'].items()]
-            return (('Field', 'Value'),
-                    [('Mgmt Result', ' ')] +
-                    mgmt_data +
-                    [('Net Result', ' ')] +
-                    net_data +
-                    [('Storage Result', ' ')] +
-                    storage_data)
+            if mgmt_res['code'] == 0 and \
+               net_res['code'] == 0 and \
+               storage_res['code'] == 0:
+                mgmt_data = [(k, v) for k, v in mgmt_res['data'].items()]
+                net_data = [(k, v) for k, v in net_res['data'].items()]
+                storage_data = [(k, v) for k, v in storage_res['data'].items()]
+                return (('Field', 'Value'),
+                        [('Mgmt Result', ' ')] +
+                        mgmt_data +
+                        [('Net Result', ' ')] +
+                        net_data +
+                        [('Storage Result', ' ')] +
+                        storage_data)
+            msg = ("One of start iperf clients error. Please check.")
+            return (['Error Mssage', ' '], [('message', msg)])
         else:
-            msg = ("Get unsupport iperf server type: %s "
-                   "Please choose from net, mgmt, storage, others "
+            msg = ("Get unsupport iperf server type: %s. "
+                   "Please choose from 'net', 'mgmt', 'storage', 'others'. "
                    % parsed_args.iperf_server_type)
             Logger.log_fail(msg)
-            return (('Field', 'Value'), [(' ', ' ')])
+            sys.exit()
