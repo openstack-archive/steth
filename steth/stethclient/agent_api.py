@@ -301,7 +301,7 @@ class PrintAgentsInfo(Lister):
             r.append(MGMT_AGENTS_INFOS[agent])
             r.append(NET_AGENTS_INFOS[agent])
             r.append(STORAGE_AGENTS_INFOS[agent])
-            agent_status = ACTIVE if self.is_agent_active(agent) else DOWN
+            agent_status = ACTIVE if not self.is_agent_active(agent) else DOWN
             r.append(agent_status)
             results.append(r)
         return (('Agent Name', 'Management IP', 'Network IP', 'Storage IP',
