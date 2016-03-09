@@ -192,7 +192,7 @@ class CheckPortsOnBr(Lister):
         server = setup_server(parsed_args.agent)
         try:
             res = server.check_ports_on_br(parsed_args.bridge,
-                                           parsed_args.port)
+                                           [parsed_args.port])
             self.log.debug('Response is %s' % res)
             if res['code'] == 1:
                 Logger.log_fail(res['message'])
