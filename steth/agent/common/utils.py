@@ -85,9 +85,9 @@ def get_interface(interface):
        such as eth0.
     """
     # Supported CentOS Version
-    supported_dists = ['7.0', '6.5']
+    supported_dists = ['7.0', '7.1', '6.5']
 
-    def format_centos_7_0(inf):
+    def format_centos_7(inf):
         pattern = r'<([A-Z]+)'
         state = re.search(pattern, stdout[0]).groups()[0]
         state = 'UP' if not cmp(state, 'UP') else 'DOWN'
@@ -134,8 +134,8 @@ def get_interface(interface):
             inf = resource.Interface(interface)
             if not cmp(linux_dist, '6.5'):
                 return format_centos_6_5(inf)
-            elif not cmp(linux_dist, '7.0'):
-                return format_centos_7_0(inf)
+            elif not cmp(linux_dist, '7.0') or not cmp(linux_dist, '7.1'):
+                return format_centos_7(inf)
         except Exception:
             message = stdout.pop(0)
             return stdcode, message, None
