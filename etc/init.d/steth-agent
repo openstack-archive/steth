@@ -3,7 +3,7 @@
 # steth  OpenStack Software Defined Networking Debuging
 #
 # chkconfig:   - 98 02
-# description: neutron provides an API to  \
+# description: root provides an API to  \
 #               * request and configure virtual networks
 # Just for CentOS 6.5
 ### END INIT INFO
@@ -22,7 +22,7 @@ lockfile=/var/lock/subsys/$prog-agent
 start() {
     [ -x $exec ] || exit 5
     echo -n $"Starting $prog: "
-    daemon --user neutron --pidfile $pidfile "$exec &>/dev/null & echo \$! > $pidfile"
+    daemon --user root --pidfile $pidfile "$exec &>/dev/null & echo \$! > $pidfile"
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile
