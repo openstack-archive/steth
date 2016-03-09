@@ -235,3 +235,6 @@ class AgentApi(object):
             for packet in listener.readpkts():
                 data[listener.name].append(scapy.get_arp_op(str(packet[1])))
         return agent_utils.make_response(code=0, data=data)
+
+    def say_hello(self):
+        return agent_utils.make_response(code=0)

@@ -23,6 +23,8 @@ from steth.stethclient.utils import Logger
 from steth.stethclient.utils import setup_server
 
 SETUP_LINK_IP_PRE = "192.168.100."
+ACTIVE = ':-)'
+DOWN = 'XXX'
 
 
 class TearDownLink(Command):
@@ -274,6 +276,15 @@ class PrintAgentsInfo(Lister):
         parser = super(PrintAgentsInfo, self).get_parser(prog_name)
         return parser
 
+    def is_agent_active(self, agent):
+        server = setup_server(agent)
+        try:
+            server.say_hello()
+            return 0
+        except:
+            # If this agent is down, "Connection refused" will happen.
+            return 1
+
     def take_action(self, parsed_args):
         try:
             from steth.stethclient.constants import MGMT_AGENTS_INFOS
@@ -290,6 +301,8 @@ class PrintAgentsInfo(Lister):
             r.append(MGMT_AGENTS_INFOS[agent])
             r.append(NET_AGENTS_INFOS[agent])
             r.append(STORAGE_AGENTS_INFOS[agent])
+            agent_status = ACTIVE if self.is_agent_active(agent) else DOWN
+            r.append(agent_status)
             results.append(r)
-        return (('Agent Name', 'Management IP', 'Network IP', 'Storage IP'),
-                results)
+        return (('Agent Name', 'Management IP', 'Network IP', 'Storage IP',
+                'Alive'), results)

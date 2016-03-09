@@ -106,3 +106,7 @@ class TestApi(unittest.TestCase):
         self.agent_api.check_dhcp_on_comp(port_id, port_mac,
                                           phy_iface, net_type)
         self.assertRaises(Exception())
+
+    def test_say_hello(self):
+        self.agent_api.say_hello()
+        self.assertEqual(agent_utils.make_response.called, True)
