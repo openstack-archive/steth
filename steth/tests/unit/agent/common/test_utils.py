@@ -73,6 +73,9 @@ class TestUtils(unittest.TestCase):
                'TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0']
         execute.return_value = (0, out)
         self.assertEqual(utils.get_interface('eth0')[0], 0)
+        # test centos 8.1
+        platform.linux_distribution = mock.Mock(return_value=['', '7.1', ''])
+        self.assertEqual(utils.get_interface('eth0')[0], 0)
         # test other distribution
         platform.linux_distribution = mock.Mock(return_value=['', '6.6', ''])
         self.assertEqual(utils.get_interface('eth0')[0], 1)
