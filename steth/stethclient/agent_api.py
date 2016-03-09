@@ -83,7 +83,7 @@ class SetUpLink(Lister):
 
 
 class GetInterface(Lister):
-    "A test function that show a message"
+    "Get interface detail information."
 
     log = logging.getLogger(__name__)
 
