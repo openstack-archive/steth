@@ -226,15 +226,15 @@ class CheckVlanInterface(Lister):
         resA = serverA.get_interface(interface)
         resB = serverB.get_interface(interface)
         if resA['code'] == 1:
-            msg = "Agent: %s has no interface named %s!" % (
-                parsed_args.agentA, interface)
-            Logger.log_fail(msg)
-            sys.exit()
+            msg = ("Agent: %s has no interface named %s !"
+                   "This interface will be created.") % (parsed_args.agentA,
+                                                         interface)
+            Logger.log_normal(msg)
         if resB['code'] == 1:
-            msg = "Agent: %s has no interface named %s!" % (
-                parsed_args.agentB, interface)
-            Logger.log_fail(msg)
-            sys.exit()
+            msg = ("Agent: %s has no interface named %s !"
+                   "This interface will be created.") % (parsed_args.agentA,
+                                                         interface)
+            Logger.log_normal(msg)
         # add vlan interface in each agent
         resA = serverA.add_vlan_to_interface(parsed_args.interface,
                                              parsed_args.vlan_id)
