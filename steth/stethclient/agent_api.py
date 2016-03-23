@@ -222,28 +222,26 @@ class CheckVlanInterface(Lister):
         serverA = setup_server(parsed_args.agentA)
         serverB = setup_server(parsed_args.agentB)
         interface = parsed_args.interface + '.' + parsed_args.vlan_id
-        # First of all, check the interface if exists
-        resA = serverA.get_interface(interface)
-        resB = serverB.get_interface(interface)
-        if resA['code'] == 1:
-            msg = "Agent: %s has no interface named %s!" % (
-                parsed_args.agentA, interface)
+        # First of all, check the interface existence
+        serverA_interface_existence = serverA.get_interface(interface)
+        serverB_interface_existence = serverB.get_interface(interface)
+
+        if serverA_interface_existence['code'] == 1:
+            msg = ("Agent: %s has no interface named %s!"
+                   "This interface will be created." % (parsed_args.agentA,
+                                                        interface))
             Logger.log_fail(msg)
-            sys.exit()
-        if resB['code'] == 1:
-            msg = "Agent: %s has no interface named %s!" % (
-                parsed_args.agentB, interface)
+            resA = serverA.add_vlan_to_interface(parsed_args.interface,
+                                                 parsed_args.vlan_id)
+            self.log.debug('Create interface success for %s' % resA)
+        if serverB_interface_existence['code'] == 1:
+            msg = ("Agent: %s has no interface named %s!"
+                   "This interface will be created." % (parsed_args.agentB,
+                                                        interface))
             Logger.log_fail(msg)
-            sys.exit()
-        # add vlan interface in each agent
-        resA = serverA.add_vlan_to_interface(parsed_args.interface,
-                                             parsed_args.vlan_id)
-        self.log.debug('Response is %s' % resA)
-        resB = serverB.add_vlan_to_interface(parsed_args.interface,
-                                             parsed_args.vlan_id)
-        self.log.debug('Response is %s' % resB)
-        Logger.log_normal(('AgentA and agentB has already added the '
-                           'interface %s ') % (interface))
+            resB = serverB.add_vlan_to_interface(parsed_args.interface,
+                                                 parsed_args.vlan_id)
+            self.log.debug('Create interface success for %s' % resB)
         # setup link in each agent
         ipA = SETUP_LINK_IP_PRE + parsed_args.agentA.split('-')[1] + '/24'
         resA = serverA.setup_link(interface, ipA)
@@ -251,18 +249,13 @@ class CheckVlanInterface(Lister):
         ipB = SETUP_LINK_IP_PRE + parsed_args.agentB.split('-')[1] + '/24'
         resB = serverB.setup_link(interface, ipB)
         self.log.debug('Response is %s' % resB)
-        Logger.log_normal(('AgentA and agentB has already setup the '
-                           'IP %s and IP %s') % (ipA, ipB))
         # ping a agent from exists IP to check connectivity
         res = serverA.ping(ips=[ipB])
-        # teardown the interface in each agent to clean all resources
-        resA = serverA.teardown_link(interface)
-        self.log.debug('Response is %s' % resA)
-        resB = serverB.teardown_link(interface)
-        self.log.debug('Response is %s' % resB)
-        Logger.log_normal(('AgentA and agentB has already deleted the'
-                           'vlan %s in %s') % (parsed_args.vlan_id,
-                                               parsed_args.interface))
+        # teardown the interface if steth created it.
+        if serverA_interface_existence['code']:
+            resA = serverA.teardown_link(interface)
+        if serverB_interface_existence['code']:
+            resB = serverB.teardown_link(interface)
         if res['code'] == 0:
             return (('Destination', 'Packet Loss (%)'),
                     ((k, v) for k, v in res['data'].items()))
