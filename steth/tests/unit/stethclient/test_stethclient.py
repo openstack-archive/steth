@@ -123,3 +123,31 @@ class TestStethClientMethods(unittest.TestCase):
                     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
                     'eth0', 'vlan'])
         self.assertEqual(self.server.check_dhcp_on_comp.called, True)
+
+    @mock.patch('neutronclient.v2_0.client.Client.show_port')
+    def test_check_dhcp_on_net(self, show_port):
+        show_port.return_value = {
+            'port': {
+                'mac_address': 'aa:bb:cc:dd:ee:ff',
+                'binding:host_id': 'server-9',
+                'network_id': '0912af24-4525-4737-beb7-c77aa14e0567',
+                'fixed_ips': [
+                    {
+                        'subnet_id': '73b19b70-c469-473a-b589-459524f2c6a6',
+                        'ip_address': u'10.0.0.3'
+                    }]
+            }
+        }
+        device = "tapaaaaaaaa-aa"
+        msg = device + "No such device exists (SIOCGIFHWADDR: No such device)"
+        check_dhcp_on_net_r = {
+            'message': msg,
+            'code': 1,
+            'data': {}
+        }
+        self.server.check_dhcp_on_net = mock.Mock(
+            return_value=check_dhcp_on_net_r)
+        shell.main(['check-dhcp-on-net',
+                    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+                    'eth0', 'vlan'])
+        self.assertEqual(self.server.check_dhcp_on_net.called, True)

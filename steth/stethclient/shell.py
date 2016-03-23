@@ -39,6 +39,7 @@ COMMAND_V1 = {
     'check-vlan-interface': agent_api.CheckVlanInterface,
     'check-iperf': iperf_api.CheckIperf,
     'check-dhcp-on-comp': dhcp.CheckDHCPonComputeNodes,
+    'check-dhcp-on-network': dhcp.CheckDHCPonNetworkNodes,
     'print-agents-info': agent_api.PrintAgentsInfo,
 }
 
