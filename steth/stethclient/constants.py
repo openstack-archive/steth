@@ -27,6 +27,17 @@ OPTS = [
                help="Prefix of every node."),
 ]
 
+NEUTRON_CLIENT_OPTS = [
+    cfg.StrOpt('username', default='admin',
+               help='To get neutronclient, you must specify a username'),
+    cfg.StrOpt('password', default='admin',
+               help='To get neutronclient, you must specify a password'),
+    cfg.StrOpt('tenant_name', default='admin',
+               help='To get neutronclient, you must specify a project'),
+    cfg.StrOpt('auth_url', default='http://127.0.0.1:5000/v2.0',
+               help='To get neutronclient, you must specify a auth_url'),
+]
+
 MGMT_AGENTS_INFOS = {}
 NET_AGENTS_INFOS = {}
 STORAGE_AGENTS_INFOS = {}
@@ -43,6 +54,8 @@ def etcdir(*p):
 steth_config_file = etcdir('steth.conf')
 
 cfg.CONF.register_opts(OPTS)
+cfg.CONF.register_opts(NEUTRON_CLIENT_OPTS, 'neutron_client')
+
 try:
     cfg.CONF([], project='steth',
              default_config_files=['/etc/steth/steth.conf'])
