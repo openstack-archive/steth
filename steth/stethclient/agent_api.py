@@ -19,6 +19,7 @@ import sys
 
 from cliff.command import Command
 from cliff.lister import Lister
+from steth.stethclient import utils
 from steth.stethclient.utils import Logger
 from steth.stethclient.utils import setup_server
 
@@ -43,10 +44,11 @@ class TearDownLink(Command):
         self.log.debug('Agent is %s' % parsed_args.agent)
         self.log.debug('Interface is %s' % parsed_args.interface)
         server = setup_server(parsed_args.agent)
-        try:
-            res = server.teardown_link(parsed_args.interface)
-        except Exception as e:
-            self.log.error('Error %s has occured because: %s' % (res, e))
+        res = server.teardown_link(parsed_args.interface)
+        if not res['code']:
+            Logger.log_normal("Delete interface success.")
+        else:
+            Logger.log_fail(res['message'])
 
 
 class SetUpLink(Lister):
@@ -161,6 +163,11 @@ class AgentPing(Lister):
         self.log.debug('Get parsed_args: %s' % parsed_args)
         server = setup_server(parsed_args.agent)
         dest = parsed_args.destination.split(',')
+        for ip in dest:
+            if utils.is_ip(ip):
+                Logger.log_fail("%s is invalid." % ip)
+                sys.exit()
+        Logger.log_normal("Ping start...")
         res = server.ping(ips=dest,
                           count=parsed_args.count,
                           timeout=parsed_args.timeout,
@@ -190,22 +197,17 @@ class CheckPortsOnBr(Lister):
     def take_action(self, parsed_args):
         self.log.debug('Get parsed_args: %s' % parsed_args)
         server = setup_server(parsed_args.agent)
-        try:
-            res = server.check_ports_on_br(parsed_args.bridge,
-                                           [parsed_args.port])
-            self.log.debug('Response is %s' % res)
-            if res['code'] == 1:
-                Logger.log_fail(res['message'])
-                sys.exit()
-            if res['code'] == 0:
-                return (('Port', 'Exists'),
-                        ((k, v) for k, v in res['data'].items()))
-        except Exception as e:
-            self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
+        res = server.check_ports_on_br(parsed_args.bridge,
+                                       [parsed_args.port])
+        self.log.debug('Response is %s' % res)
+        if res['code']
+            Logger.log_fail(res['message'])
             sys.exit()
+        return (('Port', 'Is Exist'),
+                ((k, v) for k, v in res['data'].items()))
 
 
-class CheckVlanInterface(Lister):
+class CheckVlanInterface(Command):
     """Check vlan if exists in switch"""
     log = logging.getLogger(__name__)
 
@@ -257,9 +259,10 @@ class CheckVlanInterface(Lister):
         if serverB_interface_existence['code']:
             resB = serverB.teardown_link(interface)
         if res['code'] == 0:
-            return (('Destination', 'Packet Loss (%)'),
-                    ((k, v) for k, v in res['data'].items()))
-        return (['Error Mssage', ' '], [('message', res['message'])])
+            Logger.log_normal("Packet loss is %s%%" % res['data'].values()[0])
+            sys.exit()
+        msg = "Error happens because %s" % res['message']
+        Logger.log_fail(msg)
 
 
 class PrintAgentsInfo(Lister):
