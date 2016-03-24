@@ -54,8 +54,10 @@ class CheckIperf(Lister):
                             help='IPERF server will be started at this agent.')
         parser.add_argument('client_agent', default='bad',
                             help='IPERF client will be started at this agent.')
-        parser.add_argument('iperf_server_type', default='mgmt',
-                            help='Choose from "mgmt", "net" or "storage".')
+        parser.add_argument('--iperf_server_type', default='others',
+                            help=("Choose from 'mgmt', 'net' or 'storage'."
+                                  "If you want to both of these types, "
+                                  "please choose 'others'."))
         parser.add_argument('--server_protocol', nargs='?', default='TCP')
         parser.add_argument('--server_port', nargs='?', default='5001')
         parser.add_argument('--client_protocol', nargs='?', default='TCP')
