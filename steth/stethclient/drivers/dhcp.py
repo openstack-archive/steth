@@ -144,7 +144,7 @@ class CheckDHCPonNetworkNodes(Lister):
         self.log.debug("port ip addr is %s" % port_ip_addr)
 
         # get port's host info
-        host_id = neutron.get_port_attr(parsed_args.port_id, 'binding:host_id')
+        host_id = neutron.choose_one_network_agent(port_network_id)
         if not host_id:
             utils.Logger.log_fail("Port %s doesn't attach to any vms."
                                   % parsed_args.port_id)
@@ -172,5 +172,5 @@ class CheckDHCPonNetworkNodes(Lister):
             return (['Device Name', 'Result'],
                     (['br-int', data['br-int']],
                     ['ovsbr3', data['ovsbr3']],
-                    ['eth0', data['eth0']]))
+                    [physical_interface, data[physical_interface]]))
         return (['Error Mssage', ' '], [('message', res['message'])])
