@@ -134,3 +134,9 @@ def get_ip_from_agent(node, net_type):
             return 1
     except Exception as e:
         print "Can't get ip! Because: %s" % e
+
+
+def choose_one_network_agent():
+    #TODO(changzhi) There should be choose one network node randomly.
+    # Now, just hard code.
+    return 'server-64'
