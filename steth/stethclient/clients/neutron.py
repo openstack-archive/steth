@@ -15,6 +15,7 @@
 #    under the License.
 
 
+import random
 import sys
 
 from oslo_config import cfg
@@ -48,3 +49,9 @@ def get_port_attr(port_id, attr):
         return
 
     return res['port'][attr]
+
+
+def choose_one_network_agent(network_id):
+    client = get_neutronclient()
+    dhcp_agents = client.list_dhcp_agent_hosting_networks(network_id)
+    return random.choice(dhcp_agents['agents'])['host']
