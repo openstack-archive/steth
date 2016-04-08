@@ -156,7 +156,7 @@ class AgentPing(Lister):
         parser.add_argument('destination', default='1.2.4.8')
         parser.add_argument('--count', nargs='?', default='2')
         parser.add_argument('--timeout', nargs='?', default='2')
-        parser.add_argument('--interface', nargs='?', default='eth0')
+        parser.add_argument('--interface', nargs='?', default=None)
         return parser
 
     def take_action(self, parsed_args):
