@@ -1,4 +1,6 @@
-# Steth
+=====
+Steth
+=====
 
 A network inspection tool for OpenStack.
 
@@ -7,9 +9,11 @@ A network inspection tool for OpenStack.
   * Source: https://git.openstack.org/cgit/openstack/steth
   * Bugs: https://bugs.launchpad.net/steth
   * Wiki: https://wiki.openstack.org/wiki/Steth
+  * Docs: http://steth.readthedocs.org/
 
-
-## Description
+-----------
+Description
+-----------
 
 Steth is an inspection tool that can aid in pinpointing issues before deployment
 and during operation of an OpenStack environment.
@@ -18,7 +22,9 @@ It is modelled as agent(s)/client in which a controller interacts with agents
 deployed in your environment.
 
 
-## Background
+----------
+Background
+----------
 
 OpenStack networking can be deloyed as different architectures, such as ML2 with
 OVS(legacy and DVR), Linux bridge, OVN, Dragonflow and so forth. However, they
@@ -33,13 +39,17 @@ party tools(like iperf, tcpdump, etc.) to help operators keep tracking on VM
 networking.
 
 
-## Mission
+-------
+Mission
+-------
 
 Steth is an introspection tool for OpenStack networking. Only proved to be
 working in ML2 with OVS for now.
 
 
-## Multi-node Architecture
+-----------------------
+Multi-node Architecture
+-----------------------
 
 ```
                                                                    note that steth does not save
@@ -86,7 +96,9 @@ installed in each compute and network node, and their IPs should be specified
 in the config file of steth controller.
 
 
-## Steth Agent
+-----------
+Steth Agent
+-----------
 
 Listening on 0.0.0.0:9698 and waiting for the rpc request.
 
@@ -94,3 +106,5 @@ Note: for get_interface() agent API, we use ifconfig to get full information.
 However, the output of ifconfig varies from a Linux distribution to another.
 The API has only been tested on CentOS 6.5 and 7.0. Any other distribution has
 not been tested. If it works, please let us know.
+
+
