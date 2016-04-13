@@ -94,3 +94,8 @@ Note: for get_interface() agent API, we use ifconfig to get full information.
 However, the output of ifconfig varies from a Linux distribution to another.
 The API has only been tested on CentOS 6.5 and 7.0. Any other distribution has
 not been tested. If it works, please let us know.
+
+
+## Getting started
+
+To install and configure Steth, please refer to the document at ``/steth/doc/source/index.rst``.
