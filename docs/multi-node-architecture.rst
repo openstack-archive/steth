@@ -3,7 +3,7 @@ Multi-node Architecture
 -----------------------
 
 ::
-  
+
                                                                      note that steth does not save
                                                                      any state, it acts as a rpc
                                                                      client which makes requests to steth
@@ -41,7 +41,7 @@ Multi-node Architecture
 
 In a scenario using multiple nodes, Steth is a stateless CLI and controller.
 It knows each steth agent and will read config files, interact with OpenStack,
-and sending instructions to agents when needed. 
+and sending instructions to agents when needed.
 
 Steth Agent is introduced to manage processes or run commands. It should be
 installed in each compute and network node, and their IPs should be specified
