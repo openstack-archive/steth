@@ -1,16 +1,10 @@
-===============================
-Steth's developer documentation
-===============================
+==========
+Quickstart
+==========
+
 
 Steth is an inspection tool that can aid in pinpointing issues before deployment
 and during operation of an OpenStack environment.
-
-
------------
-Quick start
------------
-
-Steth is a network inspection tool for OpenStack.
 
 It is modelled as agent(s)/client in which a controller interacts with
 agents deployed in your environment. Let me introduce how to use steth.
