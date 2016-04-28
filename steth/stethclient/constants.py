@@ -93,12 +93,12 @@ def check_ip_and_fill(agent_type, net_prefix):
             d[name_prefix + node] = net_prefix + node
             agent_type.update(d)
         else:
-            print "%s is not IP!" % name_prefix + node
+            print("%s is not IP!" % name_prefix + node)
 
 
 def validate_and_parse_network_types():
     if not cfg.CONF.network_types:
-        print 'You must fill network_types in config file!'
+        print('You must fill network_types in config file!')
         sys.exit()
     for network_type in cfg.CONF.network_types:
         net_type, net_interface, net_prefix = network_type.split(':')
@@ -118,5 +118,5 @@ def validate_and_parse_network_types():
             global STORAGE_INTERFACE
             STORAGE_INTERFACE = net_interface
         else:
-            print "Unkown network_types: %s" % network_type
+            print("Unkown network_types: %s" % network_type)
 validate_and_parse_network_types()
