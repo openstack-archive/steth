@@ -18,10 +18,11 @@ from steth.agent.common import log
 from steth.agent.common import utils
 from steth.agent.common import constants
 
-LOG = log.get_logger()
+LOG = log.get_logger(__name__)
 
 
 class PcapDriver(object):
+    """ TODO(pmath): docstring"""
 
     def setup_listener(self, iface, filter, timeout=2):
         listener = pcap.pcap(iface, timeout_ms=timeout * 1000)
