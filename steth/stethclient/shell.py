@@ -75,7 +75,7 @@ def main(argv=sys.argv[1:]):
         return StethShell(STETH_API_VERSION).run(
             map(utils.safe_decode, argv))
     except KeyboardInterrupt:
-        print "... terminating neutron client"
+        print("... terminating neutron client")
         return 1
     except Exception as e:
         print(e)
