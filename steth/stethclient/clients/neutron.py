@@ -24,7 +24,7 @@ try:
     from neutronclient.v2_0 import client
     from neutronclient.common import exceptions
 except ImportError:
-    print "Import neutronclient error. Please check it out."
+    print("Import neutronclient error. Please check it out.")
     sys.exit()
 
 
@@ -42,10 +42,10 @@ def get_port_attr(port_id, attr):
     try:
         res = client.show_port(port_id)
     except exceptions.NeutronClientException:
-        print 'Port %s Not Found.' % port_id
+        print('Port %s Not Found.' % port_id)
         return
     except KeyError:
-        print 'Port attr: %s Not Found.' % attr
+        print('Port attr: %s Not Found.' % attr)
         return
 
     return res['port'][attr]
