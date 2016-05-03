@@ -69,15 +69,15 @@ class Logger():
 
     @staticmethod
     def log_normal(info):
-        print Logger.OKBLUE + info + Logger.ENDC
+        print(Logger.OKBLUE + info + Logger.ENDC)
 
     @staticmethod
     def log_high(info):
-        print Logger.OKGREEN + info + Logger.ENDC
+        print(Logger.OKGREEN + info + Logger.ENDC)
 
     @staticmethod
     def log_fail(info):
-        print Logger.FAIL + info + Logger.ENDC
+        print(Logger.FAIL + info + Logger.ENDC)
 
 LISTEN_PORT = 9698
 
@@ -134,15 +134,7 @@ def get_ip_from_agent(node, net_type):
         else:
             return 1
     except Exception as e:
-        print "Can't get ip! Because: %s" % e
-
-
-def generate_uuid():
-    """Creates a random uuid string.
-
-    :returns: string
-    """
-    return str(uuid.uuid4())
+        print("Can't get ip! Because: %s" % e)
 
 
 def _format_uuid_string(string):
