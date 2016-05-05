@@ -48,3 +48,17 @@ Steth is an introspection tool for OpenStack networking. Only proved to be
 working in ML2 with OVS for now.
 
 
+------------
+Contributing
+------------
+
+All kinds of contributions are welcomed, such as documentation, bug fixes and
+new features. If you have a new feature or idea, ask for feedback first before
+spending lots of time on something.
+
+Please search issues and merge requests before adding something new to avoid
+duplicating efforts and conversations. Especially, when working on a bug you
+should assign it to yourself before starting to work on it.
+
+You can also post message in the OpenStack Developer mailinglist, prefixed
+with [steth].
