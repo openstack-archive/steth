@@ -23,6 +23,8 @@ from steth.stethclient import utils
 from steth.stethclient.utils import Logger
 from steth.stethclient.utils import setup_server
 
+LOG = logging.getLogger(__name__)
+
 SETUP_LINK_IP_PRE = "192.168.100."
 ACTIVE = ':-)'
 DOWN = 'XXX'
@@ -31,8 +33,6 @@ DOWN = 'XXX'
 class TearDownLink(Command):
     "Delete a link"
 
-    log = logging.getLogger(__name__)
-
     def get_parser(self, prog_name):
         parser = super(TearDownLink, self).get_parser(prog_name)
         parser.add_argument('agent', default='bad')
@@ -40,9 +40,9 @@ class TearDownLink(Command):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug('Get parsed_args: %s' % parsed_args)
-        self.log.debug('Agent is %s' % parsed_args.agent)
-        self.log.debug('Interface is %s' % parsed_args.interface)
+        LOG.debug('Get parsed_args: %s' % parsed_args)
+        LOG.debug('Agent is %s' % parsed_args.agent)
+        LOG.debug('Interface is %s' % parsed_args.interface)
         server = setup_server(parsed_args.agent)
         res = server.teardown_link(parsed_args.interface)
         if not res['code']:
@@ -54,8 +54,6 @@ class TearDownLink(Command):
 class SetUpLink(Lister):
     "Setup a link"
 
-    log = logging.getLogger(__name__)
-
     def get_parser(self, prog_name):
         parser = super(SetUpLink, self).get_parser(prog_name)
         parser.add_argument('agent', default='bad')
@@ -64,17 +62,17 @@ class SetUpLink(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug('Get parsed_args: %s' % parsed_args)
-        self.log.debug('Agent is %s' % parsed_args.agent)
-        self.log.debug('Interface is %s' % parsed_args.interface)
-        self.log.debug('Cidr is %s' % parsed_args.cidr)
+        LOG.debug('Get parsed_args: %s' % parsed_args)
+        LOG.debug('Agent is %s' % parsed_args.agent)
+        LOG.debug('Interface is %s' % parsed_args.interface)
+        LOG.debug('Cidr is %s' % parsed_args.cidr)
         server = setup_server(parsed_args.agent)
         # Setup Link
         server.setup_link(parsed_args.interface,
                           parsed_args.cidr)
         # Get Link info
         res = server.get_interface(parsed_args.interface)
-        self.log.debug('Response is %s' % res)
+        LOG.debug('Response is %s' % res)
         if res['code'] == 1:
             Logger.log_fail(res['message'])
             sys.exit()
@@ -87,8 +85,6 @@ class SetUpLink(Lister):
 class GetInterface(Lister):
     "Get interface detail information."
 
-    log = logging.getLogger(__name__)
-
     def get_parser(self, prog_name):
         parser = super(GetInterface, self).get_parser(prog_name)
         parser.add_argument('agent', default='bad')
@@ -96,12 +92,12 @@ class GetInterface(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug('Get parsed_args: %s' % parsed_args)
-        self.log.debug('Agent is %s' % parsed_args.agent)
-        self.log.debug('Interface is %s' % parsed_args.interface)
+        LOG.debug('Get parsed_args: %s' % parsed_args)
+        LOG.debug('Agent is %s' % parsed_args.agent)
+        LOG.debug('Interface is %s' % parsed_args.interface)
         server = setup_server(parsed_args.agent)
         res = server.get_interface(parsed_args.interface)
-        self.log.debug('Response is %s' % res)
+        LOG.debug('Response is %s' % res)
         if res['code'] == 0:
             return (('Field', 'Value'),
                     ((k, v) for k, v in res['data'].items()))
@@ -111,8 +107,6 @@ class GetInterface(Lister):
 class AddVlanToInterface(Lister):
     "Setup a link"
 
-    log = logging.getLogger(__name__)
-
     def get_parser(self, prog_name):
         parser = super(AddVlanToInterface, self).get_parser(prog_name)
         parser.add_argument('agent', default='bad')
@@ -121,10 +115,10 @@ class AddVlanToInterface(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug('Get parsed_args: %s' % parsed_args)
-        self.log.debug('Agent is %s' % parsed_args.agent)
-        self.log.debug('Interface is %s' % parsed_args.interface)
-        self.log.debug('Vlan_id is %s' % parsed_args.vlan_id)
+        LOG.debug('Get parsed_args: %s' % parsed_args)
+        LOG.debug('Agent is %s' % parsed_args.agent)
+        LOG.debug('Interface is %s' % parsed_args.interface)
+        LOG.debug('Vlan_id is %s' % parsed_args.vlan_id)
         server = setup_server(parsed_args.agent)
         try:
             # Setup Link
@@ -133,7 +127,7 @@ class AddVlanToInterface(Lister):
             # Get Link info
             new_interface = parsed_args.interface + '.' + parsed_args.vlan_id
             res = server.get_interface(new_interface)
-            self.log.debug('Response is %s' % res)
+            LOG.debug('Response is %s' % res)
             if res['code'] == 1:
                 Logger.log_fail(res['message'])
                 sys.exit()
@@ -141,14 +135,12 @@ class AddVlanToInterface(Lister):
                 return (('Field', 'Value'),
                         ((k, v) for k, v in res['data'].items()))
         except Exception as e:
-            self.log.error('Agent %s return error: %s!' % parsed_args.agent, e)
+            LOG.error('Agent %s return error: %s!' % parsed_args.agent, e)
             sys.exit()
 
 
 class AgentPing(Lister):
     "Ping a destination from one agent"
-
-    log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(AgentPing, self).get_parser(prog_name)
@@ -160,7 +152,7 @@ class AgentPing(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug('Get parsed_args: %s' % parsed_args)
+        LOG.debug('Get parsed_args: %s' % parsed_args)
         server = setup_server(parsed_args.agent)
         dest = parsed_args.destination.split(',')
         for ip in dest:
@@ -172,7 +164,7 @@ class AgentPing(Lister):
                           count=parsed_args.count,
                           timeout=parsed_args.timeout,
                           interface=parsed_args.interface)
-        self.log.debug('Response is %s' % res)
+        LOG.debug('Response is %s' % res)
         if res['code'] == 1:
             Logger.log_fail(res['message'])
             sys.exit()
@@ -185,8 +177,6 @@ class AgentPing(Lister):
 class CheckPortsOnBr(Lister):
     "Check a port if exists on a ovs bridge"
 
-    log = logging.getLogger(__name__)
-
     def get_parser(self, prog_name):
         parser = super(CheckPortsOnBr, self).get_parser(prog_name)
         parser.add_argument('agent', default='bad')
@@ -195,11 +185,11 @@ class CheckPortsOnBr(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug('Get parsed_args: %s' % parsed_args)
+        LOG.debug('Get parsed_args: %s' % parsed_args)
         server = setup_server(parsed_args.agent)
         res = server.check_ports_on_br(parsed_args.bridge,
                                        [parsed_args.port])
-        self.log.debug('Response is %s' % res)
+        LOG.debug('Response is %s' % res)
         if res['code']:
             Logger.log_fail(res['message'])
             sys.exit()
@@ -209,7 +199,6 @@ class CheckPortsOnBr(Lister):
 
 class CheckVlanInterface(Command):
     """Check vlan if exists in switch"""
-    log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(CheckVlanInterface, self).get_parser(prog_name)
@@ -220,7 +209,7 @@ class CheckVlanInterface(Command):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug('Get parsed_args: %s' % parsed_args)
+        LOG.debug('Get parsed_args: %s' % parsed_args)
         serverA = setup_server(parsed_args.agentA)
         serverB = setup_server(parsed_args.agentB)
         interface = parsed_args.interface + '.' + parsed_args.vlan_id
@@ -235,7 +224,7 @@ class CheckVlanInterface(Command):
             Logger.log_fail(msg)
             resA = serverA.add_vlan_to_interface(parsed_args.interface,
                                                  parsed_args.vlan_id)
-            self.log.debug('Create interface success for %s' % resA)
+            LOG.debug('Create interface success for %s' % resA)
         if serverB_interface_existence['code'] == 1:
             msg = ("Agent: %s has no interface named %s!"
                    "This interface will be created." % (parsed_args.agentB,
@@ -243,14 +232,14 @@ class CheckVlanInterface(Command):
             Logger.log_fail(msg)
             resB = serverB.add_vlan_to_interface(parsed_args.interface,
                                                  parsed_args.vlan_id)
-            self.log.debug('Create interface success for %s' % resB)
+            LOG.debug('Create interface success for %s' % resB)
         # setup link in each agent
         ipA = SETUP_LINK_IP_PRE + parsed_args.agentA.split('-')[1] + '/24'
         resA = serverA.setup_link(interface, ipA)
-        self.log.debug('Response is %s' % resA)
+        LOG.debug('Response is %s' % resA)
         ipB = SETUP_LINK_IP_PRE + parsed_args.agentB.split('-')[1] + '/24'
         resB = serverB.setup_link(interface, ipB)
-        self.log.debug('Response is %s' % resB)
+        LOG.debug('Response is %s' % resB)
         # ping a agent from exists IP to check connectivity
         res = serverA.ping(ips=[ipB])
         # teardown the interface if steth created it.

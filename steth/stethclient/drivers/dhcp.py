@@ -21,11 +21,11 @@ from cliff.lister import Lister
 from steth.stethclient.clients import neutron
 from steth.stethclient import utils
 
+LOG = logging.getLogger(__name__)
+
 
 class CheckDHCPonComputeNodes(Lister):
     "Check DHCP on compute nodes."
-
-    log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(CheckDHCPonComputeNodes, self).get_parser(prog_name)
@@ -39,7 +39,7 @@ class CheckDHCPonComputeNodes(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug('Get parsed_args: %s' % parsed_args)
+        LOG.debug('Get parsed_args: %s' % parsed_args)
         if not utils.is_uuid_like(parsed_args.port_id):
             utils.Logger.log_fail("Port id: %s is not like"
                                   "uuid." % parsed_args.port_id)
@@ -51,7 +51,7 @@ class CheckDHCPonComputeNodes(Lister):
                                   "Please choose from 'vlan' and 'vxlan'."
                                   % network_type)
             sys.exit()
-        self.log.debug("network_type is %s" % network_type)
+        LOG.debug("network_type is %s" % network_type)
 
         # get port's address
         port_mac_address = neutron.get_port_attr(parsed_args.port_id,
@@ -60,7 +60,7 @@ class CheckDHCPonComputeNodes(Lister):
             utils.Logger.log_fail("Get port mac_address fails."
                                   "Please check this port.")
             sys.exit()
-        self.log.debug("port mac address is %s" % port_mac_address)
+        LOG.debug("port mac address is %s" % port_mac_address)
 
         # get port's host info
         host_id = neutron.get_port_attr(parsed_args.port_id, 'binding:host_id')
@@ -68,25 +68,25 @@ class CheckDHCPonComputeNodes(Lister):
             utils.Logger.log_fail("Port %s doesn't attach to any vms."
                                   % parsed_args.port_id)
             sys.exit()
-        self.log.debug("port host id is %s" % host_id)
+        LOG.debug("port host id is %s" % host_id)
 
         # setup steth server
         try:
             server = utils.setup_server(host_id)
-            self.log.debug("setup server: %s" % host_id)
+            LOG.debug("setup server: %s" % host_id)
         except:
             utils.Logger.log_fail("Setup server fail in: %s." % server)
             sys.exit()
 
         # get physical interface name
         physical_interface = parsed_args.physical_interface
-        self.log.debug("Physical interface is %s" % physical_interface)
+        LOG.debug("Physical interface is %s" % physical_interface)
 
         res = server.check_dhcp_on_comp(port_id=parsed_args.port_id,
                                         port_mac=port_mac_address,
                                         phy_iface=physical_interface,
                                         net_type=network_type)
-        self.log.debug("Response is %s" % res)
+        LOG.debug("Response is %s" % res)
         data = res['data']
         return (['Device Name', 'Result'],
                 (['qvo', data['qvo']],
@@ -97,8 +97,6 @@ class CheckDHCPonComputeNodes(Lister):
 
 class CheckDHCPonNetworkNodes(Lister):
     "Check DHCP on network nodes."
-
-    log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(CheckDHCPonNetworkNodes, self).get_parser(prog_name)
@@ -112,7 +110,7 @@ class CheckDHCPonNetworkNodes(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug('Get parsed_args: %s' % parsed_args)
+        LOG.debug('Get parsed_args: %s' % parsed_args)
         if not utils.is_uuid_like(parsed_args.port_id):
             utils.Logger.log_fail("Port id: %s is not like"
                                   "uuid." % parsed_args.port_id)
@@ -124,7 +122,7 @@ class CheckDHCPonNetworkNodes(Lister):
                                   "Please choose from 'vlan' and 'vxlan'."
                                   % network_type)
             sys.exit()
-        self.log.debug("network_type is %s" % network_type)
+        LOG.debug("network_type is %s" % network_type)
 
         # get port's network_id and ip address
         port_network_id = neutron.get_port_attr(parsed_args.port_id,
@@ -133,7 +131,7 @@ class CheckDHCPonNetworkNodes(Lister):
             utils.Logger.log_fail("Get port network_id fails."
                                   "Please check this port.")
             sys.exit()
-        self.log.debug("port network id is %s" % port_network_id)
+        LOG.debug("port network id is %s" % port_network_id)
 
         port_ip_addr = neutron.get_port_attr(parsed_args.port_id,
                                              'fixed_ips')[0]['ip_address']
@@ -141,7 +139,7 @@ class CheckDHCPonNetworkNodes(Lister):
             utils.Logger.log_fail("Get port ip_addr fails."
                                   "Please check this port.")
             sys.exit()
-        self.log.debug("port ip addr is %s" % port_ip_addr)
+        LOG.debug("port ip addr is %s" % port_ip_addr)
 
         # choose one network agent
         host_id = neutron.choose_one_network_agent(port_network_id)
@@ -149,24 +147,24 @@ class CheckDHCPonNetworkNodes(Lister):
             utils.Logger.log_fail("Network %s has no dhcp services."
                                   % port_network_id)
             sys.exit()
-        self.log.debug("Get host %s" % host_id)
+        LOG.debug("Get host %s" % host_id)
 
         # setup steth server
         try:
             server = utils.setup_server(host_id)
-            self.log.debug("setup server: %s" % host_id)
+            LOG.debug("setup server: %s" % host_id)
         except:
             utils.Logger.log_fail("Setup server fail in: %s." % server)
             sys.exit()
 
         # get physical interface name
         physical_interface = parsed_args.physical_interface
-        self.log.debug("Physical interface is %s" % physical_interface)
+        LOG.debug("Physical interface is %s" % physical_interface)
         res = server.check_dhcp_on_net(net_id=port_network_id,
                                        port_ip=port_ip_addr,
                                        phy_iface=physical_interface,
                                        net_type=network_type)
-        self.log.debug("Response is %s" % res)
+        LOG.debug("Response is %s" % res)
         if res['code'] == 0:
             data = res['data']
             return (['Device Name', 'Result'],
