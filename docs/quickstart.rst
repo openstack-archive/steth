@@ -18,6 +18,14 @@ Download the latest code from git repository. And run
 ``python setup.py install`` to install steth. After running that, you can
 ``steth --help`` to confirm Steth is installed correctly.
 
+-------------
+Before Deploy
+-------------
+
+Before deploy Steth Agent and Steth Client, you should make sure you have
+installed all dependencies to run Steth. If you plan to deploy Steth on Ubuntu,
+you should install `python-dev` and `libpcap-dev` in your machine before you
+run ``pip install -r requirements.txt``.
 
 ------------------
 Deploy Steth Agent
