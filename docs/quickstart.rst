@@ -57,6 +57,7 @@ Here is an example of the configuration file
 
 ::
 
+  [DEFAULT]
   # (ListOpt) list of networks types.
   # We may have multi network types in one node, such as mgmt, net and stroage.
   # so this value should be a list.
