@@ -13,8 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import errno
+from functools import wraps
 import logging
 import jsonrpclib
+import os
+import signal
 import six
 import socket
 import sys
@@ -156,3 +160,26 @@ def is_uuid_like(val):
         return str(uuid.UUID(val)).replace('-', '') == _format_uuid_string(val)
     except (TypeError, ValueError, AttributeError):
         return False
+
+
+class TimeoutError(Exception):
+    pass
+
+
+def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
+    def decorator(func):
+        def _handle_timeout(signum, frame):
+            raise TimeoutError(error_message)
+
+        def wrapper(*args, **kwargs):
+            signal.signal(signal.SIGALRM, _handle_timeout)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+            return result
+
+        return wraps(func)(wrapper)
+
+    return decorator
