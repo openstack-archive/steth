@@ -17,6 +17,7 @@ import os
 import socket
 import sys
 from netaddr import iter_iprange
+
 from oslo_config import cfg
 from steth.stethclient.utils import Logger
 
@@ -28,6 +29,8 @@ MGMT_AGENTS_CONFIG = {}
 NET_AGENTS_CONFIG = {}
 STORAGE_AGENTS_CONFIG = {}
 
+
+from steth.stethclient.utils import Logger
 
 OPTS = [
     cfg.StrOpt('node_name_prefix', default='server-',
@@ -93,13 +96,15 @@ steth_config_file = etcdir('steth.conf')
 cfg.CONF.register_opts(OPTS)
 cfg.CONF.register_opts(NEUTRON_CLIENT_OPTS, 'neutron_client')
 
-try:
+path_to_config_file = '/etc/steth/steth.conf'
+if os.path.isfile(path_to_config_file):
     cfg.CONF([], project='steth',
-             default_config_files=['/etc/steth/steth.conf'])
-except:
-    # This exception will happen if the current environment doesn't have
-    # /etc/steth/steth.conf. If so, read configuration from
-    # etc/steth/steth.conf rather than /etc/steth/steth.conf.
+             default_config_files=[path_to_config_file])
+else:
+    msg = ("There is no config file in this environment."
+           "Please, create %s. Using sample config file now. "
+           % path_to_config_file)
+    Logger.log_high(msg)
     cfg.CONF([], project='steth',
              default_config_files=[steth_config_file])
 
