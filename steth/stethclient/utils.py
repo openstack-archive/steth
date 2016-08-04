@@ -13,8 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import errno
+from functools import wraps
 import logging
 import jsonrpclib
+import os
+import signal
 import six
 import socket
 import sys
@@ -81,32 +85,15 @@ class Logger():
 
 LISTEN_PORT = 9698
 
-try:
-    from steth.stethclient.constants import MGMT_AGENTS_INFOS
-    from steth.stethclient.constants import NET_AGENTS_INFOS
-    from steth.stethclient.constants import STORAGE_AGENTS_INFOS
-except:
-    Logger.log_fail("Import configure file fail.")
-    MGMT_AGENTS_INFOS = NET_AGENTS_INFOS = STORAGE_AGENTS_INFOS = {
-        'agent-64': "127.0.0.1",
-        'agent-65': "127.0.0.1",
-    }
-
 
 def setup_server(agent):
     log = logging.getLogger(__name__)
-    if agent in MGMT_AGENTS_INFOS:
-        log.debug('get agent:%s ip_address:%s' % (
-            agent, MGMT_AGENTS_INFOS[agent]))
-    else:
-        log.error('Agent %s not configured. Please check it.' % (agent))
-        sys.exit()
     log.debug('Begin create connection with http://%s:%s.' % (
         agent,
         LISTEN_PORT))
     server = jsonrpclib.Server('http://%s:%s' %
-                               (MGMT_AGENTS_INFOS[agent], LISTEN_PORT))
-    log.debug('Create connection with %s success.' % (agent))
+                               (agent, LISTEN_PORT))
+    log.debug('Create connection with %s success.' % agent)
     return server
 
 
@@ -124,6 +111,9 @@ def get_ip_from_agent(node, net_type):
     from steth.stethclient.constants import MGMT_TYPE
     from steth.stethclient.constants import NET_TYPE
     from steth.stethclient.constants import STORAGE_TYPE
+    from steth.stethclient.constants import MGMT_AGENTS_INFOS
+    from steth.stethclient.constants import NET_AGENTS_INFOS
+    from steth.stethclient.constants import STORAGE_AGENTS_INFOS
     try:
         if net_type == NET_TYPE:
             return NET_AGENTS_INFOS[node]
@@ -156,3 +146,26 @@ def is_uuid_like(val):
         return str(uuid.UUID(val)).replace('-', '') == _format_uuid_string(val)
     except (TypeError, ValueError, AttributeError):
         return False
+
+
+class TimeoutError(Exception):
+    pass
+
+
+def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
+    def decorator(func):
+        def _handle_timeout(signum, frame):
+            raise TimeoutError(error_message)
+
+        def wrapper(*args, **kwargs):
+            signal.signal(signal.SIGALRM, _handle_timeout)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+            return result
+
+        return wraps(func)(wrapper)
+
+    return decorator

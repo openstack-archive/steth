@@ -19,6 +19,7 @@ import sys
 
 from cliff.command import Command
 from cliff.lister import Lister
+from oslo_config import cfg
 from steth.stethclient import utils
 from steth.stethclient.utils import Logger
 from steth.stethclient.utils import setup_server
@@ -261,33 +262,36 @@ class PrintAgentsInfo(Lister):
         parser = super(PrintAgentsInfo, self).get_parser(prog_name)
         return parser
 
+    @utils.timeout(2)
     def is_agent_active(self, agent):
         server = setup_server(agent)
         try:
             server.say_hello()
             return 0
         except:
-            # If this agent is down, "Connection refused" will happen.
+            # If this agent is down, "Connection timed out" will happen.
+            # So we return 1 to set this agent is down.
             return 1
 
     def take_action(self, parsed_args):
-        try:
-            from steth.stethclient.constants import MGMT_AGENTS_INFOS
-            from steth.stethclient.constants import NET_AGENTS_INFOS
-            from steth.stethclient.constants import STORAGE_AGENTS_INFOS
-        except Exception as e:
-            Logger.log_fail("Import configure file fail. Because: %s!" % e)
-            sys.exit()
+        from steth.stethclient.constants import MGMT_AGENTS_INFOS
+        from steth.stethclient.constants import NET_AGENTS_INFOS
+        from steth.stethclient.constants import STORAGE_AGENTS_INFOS
 
         results = []
-        for agent in MGMT_AGENTS_INFOS.keys():
-            r = []
-            r.append(agent)
-            r.append(MGMT_AGENTS_INFOS[agent])
-            r.append(NET_AGENTS_INFOS[agent])
-            r.append(STORAGE_AGENTS_INFOS[agent])
-            agent_status = ACTIVE if not self.is_agent_active(agent) else DOWN
-            r.append(agent_status)
-            results.append(r)
+        for m in range(len(MGMT_AGENTS_INFOS)):
+            res = []
+            index = MGMT_AGENTS_INFOS[m]
+            try:
+                node_name = cfg.CONF.node_name_prefix + index
+                res.append(node_name)
+                res.append(index)
+                res.append(NET_AGENTS_INFOS[m])
+                res.append(STORAGE_AGENTS_INFOS[m])
+                status = ACTIVE if not self.is_agent_active(index) else DOWN
+                res.append(status)
+            except IndexError:
+                res.append('x')
+            results.append(res)
         return (('Agent Name', 'Management IP', 'Network IP', 'Storage IP',
                 'Alive'), results)
