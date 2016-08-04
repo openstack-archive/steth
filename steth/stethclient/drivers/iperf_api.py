@@ -27,12 +27,12 @@ from steth.stethclient.utils import Logger
 from steth.stethclient.utils import setup_server
 
 try:
-    from steth.stethclient.constants import MGMT_AGENTS_INFOS
-    from steth.stethclient.constants import NET_AGENTS_INFOS
-    from steth.stethclient.constants import STORAGE_AGENTS_INFOS
+    from steth.stethclient.constants import MGMT_AGENTS_CONFIG
+    from steth.stethclient.constants import NET_AGENTS_CONFIG
+    from steth.stethclient.constants import STORAGE_AGENTS_CONFIG
 except:
     Logger.log_fail("Import configure file fail.")
-    MGMT_AGENTS_INFOS = NET_AGENTS_INFOS = STORAGE_AGENTS_INFOS = {
+    MGMT_AGENTS_CONFIG = NET_AGENTS_CONFIG = STORAGE_AGENTS_CONFIG = {
         'agent-64': "127.0.0.1",
         'agent-65': "127.0.0.1",
     }
@@ -120,9 +120,9 @@ class CheckIperf(Lister):
             return (('Field', 'Value'),
                     ((k, v) for k, v in res['data'].items()))
         elif parsed_args.iperf_server_type == 'others':
-            mgmt_host = MGMT_AGENTS_INFOS[parsed_args.server_agent]
-            net_host = NET_AGENTS_INFOS[parsed_args.server_agent]
-            storage_host = STORAGE_AGENTS_INFOS[parsed_args.server_agent]
+            mgmt_host = MGMT_AGENTS_CONFIG[parsed_args.server_agent]
+            net_host = NET_AGENTS_CONFIG[parsed_args.server_agent]
+            storage_host = STORAGE_AGENTS_CONFIG[parsed_args.server_agent]
             bandwidth = parsed_args.client_bandwidth
             mgmt_res = self.take_iperf_client(
                 client=client,
