@@ -177,4 +177,5 @@ def validate_and_parse_network_types():
     check_and_fill_sdn_info()
     check_and_fill_storage_info()
 
+
 validate_and_parse_network_types()
