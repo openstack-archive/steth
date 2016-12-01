@@ -13,17 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
-
-FORMAT = '%(asctime)s %(filename)s %(levelname)s %(message)s'
-DATEFMT = '%d %b %Y %H:%M:%S'
-FILENAME = '/var/log/steth/steth-agent.log'
+from oslo_log import log
 
 
-def get_logger(filename=FILENAME, format=FORMAT,
-               datefmt=DATEFMT, filemod='a+',
-               level=logging.DEBUG):
-    logging.basicConfig(level=level, format=format, datefmt=datefmt,
-                        filename=filename, filemod=filemod)
-    log = logging.getLogger()
-    return log
+get_logger = log.getLogger
