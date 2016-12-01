@@ -14,6 +14,7 @@
 #    under the License.
 
 import logging
+from oslo_log import log
 
 FORMAT = '%(asctime)s %(filename)s %(levelname)s %(message)s'
 DATEFMT = '%d %b %Y %H:%M:%S'
@@ -27,3 +28,5 @@ def get_logger(filename=FILENAME, format=FORMAT,
                         filename=filename, filemod=filemod)
     log = logging.getLogger()
     return log
+
+get_logger= log.getLogger
