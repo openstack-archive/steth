@@ -83,6 +83,7 @@ class Logger():
     def log_fail(info):
         print(Logger.FAIL + info + Logger.ENDC)
 
+
 LISTEN_PORT = 9698
 
 

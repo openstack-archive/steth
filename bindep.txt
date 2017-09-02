@@ -1,0 +1,5 @@
+libpcap-dev [platform:dpkg]
+libpcap-devel [platform:rpm]
+python-dev [platform:dpkg]
+python-devel [platform:redhat !platform:fedora]
+python2-devel [platform:fedora]
