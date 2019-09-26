@@ -1,7 +1,0 @@
-pbr
-jsonrpclib
-netaddr
-cliff
-oslo.config>=1.6.0
-scapy-python3
-pypcap
